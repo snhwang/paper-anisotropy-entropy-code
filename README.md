@@ -22,7 +22,7 @@ The CSV outputs are committed, so `identity_checks.py` runs without the imaging 
 
 ## Installation
 
-The code was run with Python 3.14.2 and the package versions in `requirements.txt`.
+The code was run with Python 3.12 (Linux) and 3.14 (Windows), with the package versions in `requirements.txt`.
 
 ```
 pip install -r requirements.txt
