@@ -256,7 +256,7 @@ check("Figure 2, voxels checked, both rows about 387,000", float(abs(rm.n_vox.il
 fe = pd.read_csv(HERE / "fa_vs_eigen_entropy.csv")
 check("tissue voxels inside the interval, min share over subjects", float(fe.frac_inside_order1_envelope.min()), 1.0, 1e-9, "{:.4f}")
 check("rho(FA, Shannon eigenvalue entropy), weakest subject", float(fe.rho_FA_H1.abs().min()), 0.9998, 0.00006, "{:.5f}")
-check("rho(mode, position in interval), weakest subject", float(fe.rho_mode_vs_band_position.min()), 0.998, 0.0006, "{:.4f}")
+check("Figure 1C rho(mode, position in interval), FA < 1/sqrt 2, weakest subject", float(fe.rho_mode_vs_band_position.min()), 0.9998, 0.00006, "{:.5f}")
 check("median tissue FA, lowest subject", float(fe.median_FA.min()), 0.19, 0.005, "{:.3f}")
 check("median tissue FA, highest subject", float(fe.median_FA.max()), 0.21, 0.005, "{:.3f}")
 check_true("tensors are b = 1500 fits (median brain MD > 0.65e-3; the two-shell default gives about 0.57e-3)",

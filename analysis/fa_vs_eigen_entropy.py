@@ -15,9 +15,11 @@ manifest), eigenvalues from a DIPY weighted least-squares fit to the b = 0 and b
 (b1500_tensor.py), clipped at zero, mean diffusivity 0.4 to 1.5e-3 mm^2/s.
 Units: every entropy and every interval width in this script and its CSV is NORMALIZED (divided by ln 3).
 Multiply by ln 3 for natural-log units.
+Panels: A order 2 against FA, B order 1 against FA with the bounds, C the position in the band of B
+(0 at the planar bound, 1 at the linear bound, FA below 1/sqrt(2)) against mode.
 Writes figures/fa_vs_eigen_entropy.{png,pdf} and analysis/fa_vs_eigen_entropy.csv (per subject:
 identity error at order 2, share of voxels inside the order-1 envelope, rank correlation of mode
-with the position inside the band).
+with the position in the band below FA = 1/sqrt(2)).
 """
 import os
 from pathlib import Path
@@ -62,10 +64,40 @@ def family(kind, n=2001):
 LIN, PLA, EDG = family("linear"), family("planar"), family("edge")
 
 
+def family_h1(fa, kind):
+    """Normalized Shannon entropy of the family tensor with the given FA, by exact inversion of FA(t):
+    linear (1,t,t) has FA^2 = (1-t)^2/(1+2t^2), planar (1,1,t) has FA^2 = (1-t)^2/(2+t^2), and the
+    zero-eigenvalue edge (1,t,0) has FA^2 = (t^2-t+1)/(1+t^2). Each is a quadratic in t, solved in its
+    numerically stable form. Exact bounds keep the position in the band well defined at very low FA,
+    where the band is narrower than the error of interpolating the curves."""
+    f2 = np.clip(fa, 0.0, 1.0) ** 2; one = np.ones_like(f2)
+    if kind == "linear":
+        t = 2 * (1 - f2) / (2 + np.sqrt(np.clip(4 - 4 * (2 * f2 - 1) * (f2 - 1), 0, None)))
+        lam = np.stack([one, t, t], -1)
+    elif kind == "planar":
+        t = np.clip(2 * (1 - 2 * f2) / (2 + np.sqrt(np.clip(4 - 4 * (f2 - 1) * (2 * f2 - 1), 0, None))), 0, 1)
+        lam = np.stack([one, one, t], -1)
+    else:
+        t = np.clip(2 * (1 - f2) / (1 + np.sqrt(np.clip(1 - 4 * (f2 - 1) ** 2, 0, None))), 0, 1)
+        lam = np.stack([one, t, np.zeros_like(t)], -1)
+    return descriptors(lam)[1]
+
+
 def bounds(fa):
-    up = np.interp(fa, LIN[0], LIN[1])
-    lo = np.where(fa <= 1 / np.sqrt(2), np.interp(fa, PLA[0], PLA[1]), np.interp(fa, EDG[0], EDG[1]))
+    up = family_h1(fa, "linear")
+    lo = np.where(fa <= 1 / np.sqrt(2), family_h1(fa, "planar"), family_h1(fa, "edge"))
     return lo, up
+
+
+def band_position(fa, h1, lo, up):
+    below = (fa < 1 / np.sqrt(2)) & (up - lo > 0)
+    return np.where(below, (h1 - lo) / np.where(below, up - lo, 1.0), np.nan)
+
+
+# the exact bounds must reproduce the plotted family curves
+for _kind, _curve in (("linear", LIN), ("planar", PLA), ("edge", EDG)):
+    _sel = (_curve[0] <= 1 / np.sqrt(2)) if _kind == "planar" else (_curve[0] >= 1 / np.sqrt(2)) if _kind == "edge" else np.ones_like(_curve[0], bool)
+    assert np.max(np.abs(family_h1(_curve[0][_sel], _kind) - _curve[1][_sel])) < 1e-9, f"exact {_kind} bound disagrees with its curve"
 
 
 man = pd.read_csv(MANIFEST, sep="\t").head(4)
@@ -81,17 +113,19 @@ for k, (_, r) in enumerate(man.iterrows()):
     ident = float(np.max(np.abs(h2 - np.log(3 - 2 * fa ** 2) / LN3)))
     lo, up = bounds(fa); tol = 1e-6
     inside = float(np.mean((h1 >= lo - tol) & (h1 <= up + tol)))
-    width = up - lo; pos = np.where(width > 1e-4, (h1 - lo) / np.maximum(width, 1e-12), np.nan)
+    # position in the band, 0 at the planar bound and 1 at the linear bound, below FA = 1/sqrt(2)
+    # (above it the lower bound is the zero-eigenvalue edge and the position means something else)
+    width = up - lo; pos = band_position(fa, h1, lo, up)
     wide = np.isfinite(pos)
     rho = float(stats.spearmanr(mode[wide], pos[wide])[0])
     rows.append(dict(subject=f"S{k+1}", n_tissue=int(fa.size), median_MD_brain=float(np.median(md[mask])), identity_order2_max_abs_err=ident, frac_inside_order1_envelope=inside,
-                     rho_mode_vs_band_position=rho, n_band_wider_than_1e4=int(wide.sum()), median_FA=float(np.median(fa)),
+                     rho_mode_vs_band_position=rho, n_FA_below_0p707=int(wide.sum()), median_FA=float(np.median(fa)),
                      frac_FA_above_0p707=float(np.mean(fa > 1 / np.sqrt(2))), median_band_width_at_voxel_FA=float(np.median(width)),
                      rho_FA_H1=float(stats.spearmanr(fa, h1)[0]), frac_FA_above_0p5=float(np.mean(fa > 0.5))))
     print(f"S{k+1}: n={fa.size}, order-2 identity max err {ident:.1e}, inside order-1 envelope {100*inside:.3f}%, "
           f"rho(mode, band position) {rho:+.3f}, median FA {np.median(fa):.3f}, FA>0.707 {100*np.mean(fa > 0.7071):.1f}%")
     pick = rng.choice(fa.size, min(PER_SUBJECT, fa.size), replace=False)
-    pts.append(np.stack([fa[pick], h1[pick], h2[pick], mode[pick]], 1))
+    pts.append(np.stack([fa[pick], h1[pick], h2[pick], mode[pick], pos[pick]], 1))
 df = pd.DataFrame(rows); df.to_csv(HERE / "fa_vs_eigen_entropy.csv", index=False)
 P = np.concatenate(pts); P = P[rng.permutation(len(P))]
 # the figure is drawn on the natural-log scale (entropies in [0, ln 3]); the CSV stays normalized
@@ -103,11 +137,13 @@ LIN_P, PLA_P, EDG_P = [(c[0], c[1] * LN3) for c in (LIN, PLA, EDG)]
 plt.rcParams.update({"font.size": 7, "axes.titlesize": 8, "axes.labelsize": 7.5, "xtick.labelsize": 7, "ytick.labelsize": 7,
                      "legend.fontsize": 7, "axes.linewidth": 0.6, "xtick.major.width": 0.6, "ytick.major.width": 0.6,
                      "axes.edgecolor": INK2, "axes.labelcolor": INK, "xtick.color": INK2, "ytick.color": INK2, "text.color": INK})
-fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.6), sharex=True, sharey=True, layout="constrained")
+fig, axes = plt.subplots(1, 3, figsize=(6.8, 2.6), layout="constrained", width_ratios=[1, 1, 0.78])
+axes[1].sharex(axes[0]); axes[1].sharey(axes[0]); axes[1].tick_params(labelleft=False)
 for ax in axes:
-    ax.set_xlim(0, 1); ax.set_ylim(0, 1.02 * LN3)
     ax.grid(True, color=GRID, linewidth=0.4); ax.set_axisbelow(True)
     for sp in ("top", "right"): ax.spines[sp].set_visible(False)
+for ax in axes[:2]:
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1.02 * LN3)
     ax.set_xlabel("FA")
 
 ax = axes[0]
@@ -128,15 +164,17 @@ def draw_b(a, s_pt, lw):
 
 ax = axes[1]
 draw_b(ax, 1.0, 0.8)
-ax.set_title(r"B. Order 1: a band set by the mode", loc="left")
+ax.set_title(r"B. Order 1: a band", loc="left")
 ax.legend(loc="lower left", frameon=False, handlelength=1.6)
-ins = ax.inset_axes([0.15, 0.355, 0.42, 0.355])  # left edge clears the main y-axis for the inset tick labels
-draw_b(ins, 1.6, 0.8)
-# zoom about 2x on both axes, where the order-1 band opens and the mode gradient across it is visible
-ins.set_xlim(0.50, 0.70); ins.set_ylim(0.82, 1.01)
-ins.tick_params(labelsize=6, colors=INK2, width=0.5, length=2); ins.grid(True, color=GRID, linewidth=0.35); ins.set_axisbelow(True)
-for sp in ins.spines.values(): sp.set_edgecolor(INK2); sp.set_linewidth(0.5)
-ax.indicate_inset_zoom(ins, edgecolor=INK2, alpha=0.6, linewidth=0.5)
+
+# C: where each voxel sits in the band of B, against its mode (FA below 1/sqrt(2))
+ax = axes[2]
+okp = np.isfinite(P[:, 4])
+ax.scatter(P[okp, 3], P[okp, 4], c=P[okp, 3], cmap=CMAP, vmin=-1, vmax=1, s=1.0, alpha=0.6, linewidths=0, rasterized=True, zorder=2)
+ax.set_xlim(-1.05, 1.05); ax.set_ylim(-0.03, 1.03)
+ax.set_xticks([-1, 0, 1]); ax.set_yticks([0, 0.5, 1])
+ax.set_xlabel("tensor mode"); ax.set_ylabel("position in the band of B")
+ax.set_title(r"C. The mode sets the position", loc="left")
 
 cb = fig.colorbar(sc, ax=axes, fraction=0.03, pad=0.02, ticks=[-1, 0, 1])
 cb.ax.set_yticklabels(["planar", "0", "linear"]); cb.set_label("tensor mode", color=INK); cb.outline.set_edgecolor(GRID)
