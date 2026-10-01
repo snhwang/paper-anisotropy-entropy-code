@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+# cached tensor fits of HCP-A sessions (derived from controlled-access data)
+analysis/_cache/
+# figures drawn when the manuscript folder is absent
+figures/
+# data of the diagnostic figure of synthetic_profiles.py, not used by the paper
+analysis/synthetic_profiles_divergences.csv

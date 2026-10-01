@@ -1,0 +1,25 @@
+quantity,value
+simplex triples,13534.000000
+"Jensen violations, profile deficit > eigenvalue deficit",0.000000
+ratio min (FA > 0.02),0.308517
+ratio min at FA,0.707107
+ratio min at mode,-1.000000
+ratio max (FA > 0.02),0.417287
+ratio max at FA,0.816528
+ratio max at mode,1.000000
+"ratio median, FA < 0.05",0.399862
+"strong fiber (1.7, 0.3, 0.3): profile deficit",0.143464
+"strong fiber (1.7, 0.3, 0.3): eigenvalue deficit",0.343827
+"strong fiber (1.7, 0.3, 0.3): ratio",0.417256
+"stick (1, 0, 0): profile deficit",0.431946
+"stick (1, 0, 0): eigenvalue deficit",1.098612
+"stick (1, 0, 0): ratio",0.393174
+"flat disc (1, 1, 0): profile deficit",0.125093
+"flat disc (1, 1, 0): eigenvalue deficit",0.405465
+"flat disc (1, 1, 0): ratio",0.308517
+"planar (1.2, 1.2, 0.3): profile deficit",0.049285
+"planar (1.2, 1.2, 0.3): eigenvalue deficit",0.133649
+"planar (1.2, 1.2, 0.3): ratio",0.368760
+"near isotropic (1.01, 1, 0.99): profile deficit",0.000013
+"near isotropic (1.01, 1, 0.99): eigenvalue deficit",0.000033
+"near isotropic (1.01, 1, 0.99): ratio",0.399997
