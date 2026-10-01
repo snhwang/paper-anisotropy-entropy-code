@@ -137,21 +137,21 @@ LIN_P, PLA_P, EDG_P = [(c[0], c[1] * LN3) for c in (LIN, PLA, EDG)]
 plt.rcParams.update({"font.size": 7, "axes.titlesize": 8, "axes.labelsize": 7.5, "xtick.labelsize": 7, "ytick.labelsize": 7,
                      "legend.fontsize": 7, "axes.linewidth": 0.6, "xtick.major.width": 0.6, "ytick.major.width": 0.6,
                      "axes.edgecolor": INK2, "axes.labelcolor": INK, "xtick.color": INK2, "ytick.color": INK2, "text.color": INK})
-fig, axes = plt.subplots(1, 3, figsize=(6.8, 2.6), layout="constrained", width_ratios=[1, 1, 0.78])
+fig, axes = plt.subplots(1, 3, figsize=(6.8, 2.2), layout="constrained", width_ratios=[1, 1, 0.78])
 axes[1].sharex(axes[0]); axes[1].sharey(axes[0]); axes[1].tick_params(labelleft=False)
 for ax in axes:
     ax.grid(True, color=GRID, linewidth=0.4); ax.set_axisbelow(True)
     for sp in ("top", "right"): ax.spines[sp].set_visible(False)
 for ax in axes[:2]:
     ax.set_xlim(0, 1); ax.set_ylim(0, 1.02 * LN3)
-    ax.set_xlabel("FA")
+    ax.set_xlabel("FA (order 2)")
 
 ax = axes[0]
 f = np.linspace(0, 1, 400)
 ax.plot(f, np.log(3 - 2 * f ** 2), color=INK, linewidth=0.7, zorder=1, label=r"$H_2 = \ln(3-2\,\mathrm{FA}^2)$")
 sc = ax.scatter(P[:, 0], P[:, 2], c=P[:, 3], cmap=CMAP, vmin=-1, vmax=1, s=1.2, alpha=0.6, linewidths=0, rasterized=True, zorder=2)
-ax.set_ylabel(r"eigenvalue entropy $H_\alpha(\lambda)$")
-ax.set_title(r"A. Order 2: one curve", loc="left")
+ax.set_ylabel(r"order-2 eigenvalue entropy $H_2$")
+ax.set_title(r"A. Same order: one curve", loc="left")
 ax.legend(loc="lower left", frameon=False)
 
 
@@ -164,7 +164,8 @@ def draw_b(a, s_pt, lw):
 
 ax = axes[1]
 draw_b(ax, 1.0, 0.8)
-ax.set_title(r"B. Order 1: a band", loc="left")
+ax.set_ylabel(r"order-1 eigenvalue entropy $H_1$")
+ax.set_title(r"B. Different orders: a band", loc="left")
 ax.legend(loc="lower left", frameon=False, handlelength=1.6)
 
 # C: where each voxel sits in the band of B, against its mode (FA below 1/sqrt(2))
@@ -174,7 +175,7 @@ ax.scatter(P[okp, 3], P[okp, 4], c=P[okp, 3], cmap=CMAP, vmin=-1, vmax=1, s=1.0,
 ax.set_xlim(-1.05, 1.05); ax.set_ylim(-0.03, 1.03)
 ax.set_xticks([-1, 0, 1]); ax.set_yticks([0, 0.5, 1])
 ax.set_xlabel("tensor mode"); ax.set_ylabel("position in the band of B")
-ax.set_title(r"C. The mode sets the position", loc="left")
+ax.set_title(r"C. Tensor mode sets the position", loc="left")
 
 cb = fig.colorbar(sc, ax=axes, fraction=0.03, pad=0.02, ticks=[-1, 0, 1])
 cb.ax.set_yticklabels(["planar", "0", "linear"]); cb.set_label("tensor mode", color=INK); cb.outline.set_edgecolor(GRID)
