@@ -15,8 +15,8 @@ manifest), eigenvalues from a DIPY weighted least-squares fit to the b = 0 and b
 (b1500_tensor.py), clipped at zero, mean diffusivity 0.4 to 1.5e-3 mm^2/s.
 Units: every entropy and every interval width in this script and its CSV is NORMALIZED (divided by ln 3).
 Multiply by ln 3 for natural-log units.
-Panels: A order 2 against FA, B order 1 against FA with the bounds, C the position in the band of B
-(0 at the planar bound, 1 at the linear bound, FA below 1/sqrt(2)) against mode.
+Panels: A the order-2 entropy against FA, one curve, with one value marked; B the order-1 entropy
+against FA, with the band between the bounds shaded and its range marked at one FA.
 Writes figures/fa_vs_eigen_entropy.{png,pdf} and analysis/fa_vs_eigen_entropy.csv (per subject:
 identity error at order 2, share of voxels inside the order-1 envelope, rank correlation of mode
 with the position in the band below FA = 1/sqrt(2)).
@@ -137,19 +137,28 @@ LIN_P, PLA_P, EDG_P = [(c[0], c[1] * LN3) for c in (LIN, PLA, EDG)]
 plt.rcParams.update({"font.size": 7, "axes.titlesize": 8, "axes.labelsize": 7.5, "xtick.labelsize": 7, "ytick.labelsize": 7,
                      "legend.fontsize": 7, "axes.linewidth": 0.6, "xtick.major.width": 0.6, "ytick.major.width": 0.6,
                      "axes.edgecolor": INK2, "axes.labelcolor": INK, "xtick.color": INK2, "ytick.color": INK2, "text.color": INK})
-fig, axes = plt.subplots(1, 3, figsize=(6.8, 2.2), layout="constrained", width_ratios=[1, 1, 0.78])
-axes[1].sharex(axes[0]); axes[1].sharey(axes[0]); axes[1].tick_params(labelleft=False)
+fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.2), sharex=True, layout="constrained")
 for ax in axes:
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1.02 * LN3)
     ax.grid(True, color=GRID, linewidth=0.4); ax.set_axisbelow(True)
     for sp in ("top", "right"): ax.spines[sp].set_visible(False)
-for ax in axes[:2]:
-    ax.set_xlim(0, 1); ax.set_ylim(0, 1.02 * LN3)
     ax.set_xlabel("FA (order 2)")
+F_MARK = 0.7      # FA at which A marks its single entropy value and B the range of entropies
+BAND = "#ebe6dc"  # fill of the order-1 band
+
+
+def note(a, x, y, text):
+    a.annotate(text, xy=(x, y), xytext=(x - 0.04, y - 0.13), ha="right", va="top", fontsize=6.5, color=INK,
+               arrowprops=dict(arrowstyle="-", color=INK2, lw=0.5, shrinkA=1, shrinkB=2), zorder=5)
+
 
 ax = axes[0]
 f = np.linspace(0, 1, 400)
 ax.plot(f, np.log(3 - 2 * f ** 2), color=INK, linewidth=0.7, zorder=1, label=r"$H_2 = \ln(3-2\,\mathrm{FA}^2)$")
 sc = ax.scatter(P[:, 0], P[:, 2], c=P[:, 3], cmap=CMAP, vmin=-1, vmax=1, s=1.2, alpha=0.6, linewidths=0, rasterized=True, zorder=2)
+h2_mark = np.log(3 - 2 * F_MARK ** 2)
+ax.plot([F_MARK], [h2_mark], marker="o", ms=3.2, mfc="white", mec=INK, mew=0.8, zorder=4)
+note(ax, F_MARK, h2_mark, rf"one value of $H_2$ at FA {F_MARK}")
 ax.set_ylabel(r"order-2 eigenvalue entropy $H_2$")
 ax.set_title(r"A. Same order: one curve", loc="left")
 ax.legend(loc="lower left", frameon=False)
@@ -163,19 +172,17 @@ def draw_b(a, s_pt, lw):
 
 
 ax = axes[1]
+fg = np.linspace(0, 1, 801)
+lo_g, up_g = bounds(fg)
+ax.fill_between(fg, lo_g * LN3, up_g * LN3, color=BAND, linewidth=0, zorder=0.5)
 draw_b(ax, 1.0, 0.8)
+lo_m, up_m = (v[0] * LN3 for v in bounds(np.array([F_MARK])))
+ax.annotate("", xy=(F_MARK, up_m), xytext=(F_MARK, lo_m), zorder=4,
+            arrowprops=dict(arrowstyle="|-|,widthA=0.2,widthB=0.2", color=INK, lw=0.8, shrinkA=0, shrinkB=0))
+note(ax, F_MARK, lo_m, rf"range of $H_1$ at FA {F_MARK}")
 ax.set_ylabel(r"order-1 eigenvalue entropy $H_1$")
 ax.set_title(r"B. Different orders: a band", loc="left")
 ax.legend(loc="lower left", frameon=False, handlelength=1.6)
-
-# C: where each voxel sits in the band of B, against its mode (FA below 1/sqrt(2))
-ax = axes[2]
-okp = np.isfinite(P[:, 4])
-ax.scatter(P[okp, 3], P[okp, 4], c=P[okp, 3], cmap=CMAP, vmin=-1, vmax=1, s=1.0, alpha=0.6, linewidths=0, rasterized=True, zorder=2)
-ax.set_xlim(-1.05, 1.05); ax.set_ylim(-0.03, 1.03)
-ax.set_xticks([-1, 0, 1]); ax.set_yticks([0, 0.5, 1])
-ax.set_xlabel("tensor mode"); ax.set_ylabel("position in the band of B")
-ax.set_title(r"C. Tensor mode sets the position", loc="left")
 
 cb = fig.colorbar(sc, ax=axes, fraction=0.03, pad=0.02, ticks=[-1, 0, 1])
 cb.ax.set_yticklabels(["planar", "0", "linear"]); cb.set_label("tensor mode", color=INK); cb.outline.set_edgecolor(GRID)
