@@ -99,11 +99,11 @@ P[:, 1:3] *= LN3
 LIN_P, PLA_P, EDG_P = [(c[0], c[1] * LN3) for c in (LIN, PLA, EDG)]
 
 # ---------------------------------------------------------------- figure
-# drawn at its printed size (5.5 in wide) so font sizes are the printed sizes; include without scaling
+# drawn at its printed size (6.8 in wide, the CAS text width is 6.84 in) so font sizes are the printed sizes; include without scaling
 plt.rcParams.update({"font.size": 7, "axes.titlesize": 8, "axes.labelsize": 7.5, "xtick.labelsize": 7, "ytick.labelsize": 7,
                      "legend.fontsize": 7, "axes.linewidth": 0.6, "xtick.major.width": 0.6, "ytick.major.width": 0.6,
                      "axes.edgecolor": INK2, "axes.labelcolor": INK, "xtick.color": INK2, "ytick.color": INK2, "text.color": INK})
-fig, axes = plt.subplots(1, 2, figsize=(5.5, 2.6), sharex=True, sharey=True, layout="constrained")
+fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.6), sharex=True, sharey=True, layout="constrained")
 for ax in axes:
     ax.set_xlim(0, 1); ax.set_ylim(0, 1.02 * LN3)
     ax.grid(True, color=GRID, linewidth=0.4); ax.set_axisbelow(True)
@@ -130,7 +130,7 @@ ax = axes[1]
 draw_b(ax, 1.0, 0.8)
 ax.set_title(r"B. Order 1: a band set by the mode", loc="left")
 ax.legend(loc="lower left", frameon=False, handlelength=1.6)
-ins = ax.inset_axes([0.07, 0.355, 0.42, 0.355])
+ins = ax.inset_axes([0.15, 0.355, 0.42, 0.355])  # left edge clears the main y-axis for the inset tick labels
 draw_b(ins, 1.6, 0.8)
 # zoom about 2x on both axes, where the order-1 band opens and the mode gradient across it is visible
 ins.set_xlim(0.50, 0.70); ins.set_ylim(0.82, 1.01)
