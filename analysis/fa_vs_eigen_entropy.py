@@ -154,8 +154,8 @@ def note(a, x, y, text):
 
 ax = axes[0]
 f = np.linspace(0, 1, 400)
-ax.plot(f, np.log(3 - 2 * f ** 2), color=INK, linewidth=0.7, zorder=1, label=r"$H_2 = \ln(3-2\,\mathrm{FA}^2)$")
-sc = ax.scatter(P[:, 0], P[:, 2], c=P[:, 3], cmap=CMAP, vmin=-1, vmax=1, s=1.2, alpha=0.6, linewidths=0, rasterized=True, zorder=2)
+ax.plot(f, np.log(3 - 2 * f ** 2), color=INK, linewidth=0.6, zorder=1, label=r"$H_2 = \ln(3-2\,\mathrm{FA}^2)$")
+sc = ax.scatter(P[:, 0], P[:, 2], c=P[:, 3], cmap=CMAP, vmin=-1, vmax=1, s=0.3, alpha=0.9, linewidths=0, rasterized=True, zorder=2)
 h2_mark = np.log(3 - 2 * F_MARK ** 2)
 ax.plot([F_MARK], [h2_mark], marker="o", ms=3.2, mfc="white", mec=INK, mew=0.8, zorder=4)
 note(ax, F_MARK, h2_mark, rf"one value of $H_2$ at FA {F_MARK}")
@@ -188,5 +188,5 @@ cb = fig.colorbar(sc, ax=axes, fraction=0.03, pad=0.02, ticks=[-1, 0, 1])
 cb.ax.set_yticklabels(["planar", "0", "linear"]); cb.set_label("tensor mode", color=INK); cb.outline.set_edgecolor(GRID)
 cb.solids.set_alpha(1)
 fig.savefig(FIGURES / "fa_vs_eigen_entropy.png", dpi=300)
-fig.savefig(FIGURES / "fa_vs_eigen_entropy.pdf")
+fig.savefig(FIGURES / "fa_vs_eigen_entropy.pdf", dpi=600)  # resolution of the rasterized scatter layers
 print("written -> figures/fa_vs_eigen_entropy.{png,pdf}, analysis/fa_vs_eigen_entropy.csv")
