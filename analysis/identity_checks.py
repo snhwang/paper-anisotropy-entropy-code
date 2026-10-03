@@ -244,8 +244,13 @@ check("CV_D^2 / CV_lambda^2, single-tensor voxels on 93 directions, max |ratio -
 cv2s = s.loc["single fiber, strong"].CV_D ** 2
 check("second-order form overstates the order-2 member at CV 0.544 (fraction)", cv2s / np.log1p(cv2s) - 1, 0.14, 0.005, "{:.3f}")
 check("strong single fiber CV_D", float(s.loc["single fiber, strong"].CV_D), 0.544, 0.0005, "{:.4f}")
-check("gap strong fiber vs 60 deg crossing in H~1", s.loc["crossing 60 deg"].Hn_1 - s.loc["single fiber, strong"].Hn_1, 0.018, 0.001, "{:.3f}")
-check("gap strong fiber vs 60 deg crossing in H~inf", s.loc["crossing 60 deg"].Hn_inf - s.loc["single fiber, strong"].Hn_inf, 0.028, 0.001, "{:.3f}")
+tab = s.loc[[c for c in s.index if c not in ("isotropic", "three-way crossing")]]
+check("Table 1: H~2 = 1 - ln(1 + CV_D^2)/ln N, max error", float(np.max(np.abs(tab.Hn_2 - (1 - np.log1p(tab.CV_D ** 2) / np.log(93))))), 0.0, 1e-9, "{:.1e}")
+check_true("Table 1: CV_D and H~2 rank the voxels in exactly opposite order",
+           list(tab.CV_D.sort_values().index) == list(tab.Hn_2.sort_values(ascending=False).index))
+pl, cr = tab.loc["planar (oblate)"], tab.loc["crossing 90 deg"]
+check_true("Table 1: planar vs 90 deg crossing, larger CV_D and smaller H~2 but larger H~inf",
+           bool(pl.CV_D > cr.CV_D and pl.Hn_2 < cr.Hn_2 and pl.Hn_inf > cr.Hn_inf))
 
 check("Figure 1 H_2 = ln(3 - 2 FA^2): tissue identity error (from CSV, normalized)", float(fe_max) if (fe_max := pd.read_csv(HERE / "fa_vs_eigen_entropy.csv").identity_order2_max_abs_err.max()) is not None else 1.0, 0.0, 1e-12, "{:.1e}")
 
