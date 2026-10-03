@@ -58,3 +58,7 @@ The data scripts expect two inputs, located through environment variables (see `
 Tensor eigenvalues come from a DIPY weighted least-squares fit to the b ≈ 0 and b = 1500 s/mm² volumes (`b1500_tensor.py`). The fits are cached in `analysis/_cache/`, which is not tracked.
 
 Figures are written to the `figures/` folder of the manuscript when `PAPER_DIR` points to it, or when the manuscript folder sits beside this repository as `paper-anisotropy-entropy`. Otherwise they go to `figures/` here.
+
+## License
+
+Licensed under the Open Core Ventures Source Available License (OCVSAL) v1.0. See [LICENSE](LICENSE). Reading, running and modifying the code for non-production use, including reproducing the results of the paper, is permitted. Production use requires a commercial agreement. For commercial licensing, contact the Penn State Office of Technology Transfer at ottinfo@psu.edu.
