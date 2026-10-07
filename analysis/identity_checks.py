@@ -130,7 +130,7 @@ for _ in range(2000):  # Dryden et al. 2009: PA = FA of sqrt(eigenvalues); Cheng
     worst_pa = max(worst_pa, abs(fa(np.sqrt(lam)) ** 2 - 1.5 * (1 - np.exp(-D_half))))
     K = int(r_pa.integers(3, 100)); q = r_pa.dirichlet(np.ones(K)); GA = np.arccos(np.sqrt(q / K).sum())
     worst_ga = max(worst_ga, abs(renyi(q, 0.5) - (2 * np.log(np.cos(GA)) + np.log(K))))
-check("Procrustes anisotropy (Dryden 2009): PA^2 = (3/2)(1 - exp(-D_1/2))", worst_pa, 0.0, 1e-12, "{:.1e}")
+check("Procrustes anisotropy (Dryden 2009): PA^2 = (3/2)(1 - exp(-Div_1/2))", worst_pa, 0.0, 1e-12, "{:.1e}")
 check("Cheng 2009 order 1/2: H_1/2 = 2 ln cos(GA) + ln K, GA = arccos <sqrt p, sqrt u>", worst_ga, 0.0, 1e-12, "{:.1e}")
 
 # A7. fixed-FA interval of the Shannon eigenvalue entropy (Harremoes-Topsoe, K = 3)
