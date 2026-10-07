@@ -8,14 +8,15 @@ The paper shows that diffusion anisotropy indices and entropies are one quantity
 
 | Script | Paper item | Output | Needs imaging data |
 |---|---|---|---|
-| `analysis/identity_checks.py` | every relation and quoted number | console report, non-zero exit on failure | no |
-| `analysis/synthetic_profiles.py` | Table 1 (synthetic voxels) | `synthetic_profiles.csv` | no |
-| `analysis/order1_link.py` | Section 4.2, order-1 profile against eigenvalue deficit | `order1_link.csv` | no |
+| `analysis/identity_checks.py` | every relation and quoted number, and the Discussion's worked numbers (scale of the order-2 deficit, region averages, effective numbers), which it computes directly | console report, non-zero exit on failure | no |
+| `analysis/synthetic_profiles.py` | Table 1 and Section 4.3 (synthetic voxels), the two-fifths ratio on 93 directions in Section 4.2 | `synthetic_profiles.csv` | no |
+| `analysis/order1_link.py` | Section 4.2, order-1 profile deficit against the eigenvalue deficit | `order1_link.csv` | no |
 | `analysis/direction_count.py` | Discussion, dependence on the number of directions | `direction_count.csv` | no |
-| `analysis/fa_vs_eigen_entropy.py` | Figure 1 | `fa_vs_eigen_entropy.{png,pdf}`, `fa_vs_eigen_entropy.csv` | yes |
-| `analysis/build_reflections_maps.py` | Figure 2 | `reflections_maps.{png,pdf}`, `reflections_maps_check.csv` | yes |
-| `analysis/renyi_order_test.py` | Section 5, order-1 against order-2 entropies in tissue | `renyi_order_test.csv` | yes |
-| `analysis/b1500_tensor.py` | helper, b = 1500 tensor fit | cached eigenvalues in `analysis/_cache/` | yes |
+| `analysis/fa_vs_eigen_entropy.py` | Figure 1, and the tissue numbers of Sections 3.2 and 5 (FA against the eigenvalue entropy, ordering by tensor mode, median FA) | `fa_vs_eigen_entropy.{png,pdf}`, `fa_vs_eigen_entropy.csv` | yes |
+| `analysis/build_reflections_maps.py` | Figure 2 and its voxelwise identities | `reflections_maps.{png,pdf}`, `reflections_maps_check.csv` | yes |
+| `analysis/renyi_order_test.py` | Abstract and Section 5, order-1 against order-2 directional entropies in tissue | `renyi_order_test.csv` | yes |
+| `analysis/acquisition_counts.py` | Section 5, number of directions and of b ≈ 0 volumes, near-uniform sampling | `acquisition_counts.csv` | yes |
+| `analysis/b1500_tensor.py` | helper, b = 1500 tensor fit used by the figure scripts | cached eigenvalues in `analysis/_cache/` | yes |
 | `analysis/paths.py` | helper, data and output locations | none | no |
 
 The CSV outputs are committed, so `identity_checks.py` runs without the imaging data.
@@ -45,6 +46,16 @@ python analysis/direction_count.py
 ```
 
 `synthetic_profiles.py` also draws a diagnostic figure into `figures/` in this repository. It is not a figure of the paper.
+
+With the imaging data in place (see below), the remaining scripts rebuild the figures and the tissue CSVs. The first run of a figure script fits the tensors and caches them, which takes a few minutes per participant.
+
+```
+python analysis/acquisition_counts.py
+python analysis/fa_vs_eigen_entropy.py
+python analysis/build_reflections_maps.py
+python analysis/renyi_order_test.py
+python analysis/identity_checks.py
+```
 
 ## Imaging data
 

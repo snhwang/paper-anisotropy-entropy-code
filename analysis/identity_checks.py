@@ -9,8 +9,10 @@ Part B reads the CSV outputs of the scripts in this folder:
   reflections_maps_check.csv    build_reflections_maps.py  (Figure 2, voxelwise identities)
   fa_vs_eigen_entropy.csv       fa_vs_eigen_entropy.py     (tensor interval in tissue)
   renyi_order_test.csv          renyi_order_test.py        (orders 1 and 2 in tissue)
-The last three need the HCP-Aging processing sessions (DTI_OUTPUT_DIR) to regenerate, and their CSVs
-are kept here so the checks run without the data.
+  acquisition_counts.csv        acquisition_counts.py      (Section 5 acquisition facts)
+The last four need the HCP-Aging processing sessions (DTI_OUTPUT_DIR) to regenerate, and their CSVs
+are kept here so the checks run without the data. Part A also computes the Discussion's worked
+numbers (scale of the order-2 deficit, region averages, effective numbers) directly.
 Usage:  python identity_checks.py
 """
 import sys
@@ -266,6 +268,12 @@ check("median tissue FA, lowest subject", float(fe.median_FA.min()), 0.19, 0.005
 check("median tissue FA, highest subject", float(fe.median_FA.max()), 0.21, 0.005, "{:.3f}")
 check_true("tensors are b = 1500 fits (median brain MD > 0.65e-3; the two-shell default gives about 0.57e-3)",
            bool((fe.median_MD_brain > 0.65e-3).all()))
+
+ac = pd.read_csv(HERE / "acquisition_counts.csv")
+check_true("Sec 5: 93 directions at b = 1500 in all four subjects", bool((ac.n_b1500 == 93).all()) and len(ac) == 4)
+check_true("Sec 5: 14 b ~ 0 volumes, interleaved through the series (largest gap under 10% of the volumes)",
+           bool((ac.n_b0 == 14).all() and (ac.largest_b0_gap < 0.1 * ac.n_volumes).all() and (ac.last_b0 > 0.8 * ac.n_volumes).all()))
+check("Sec 5: near-uniform directions, largest |<g g^T> - I/3|, worst subject", float(ac.second_moment_max_dev.max()), 0.0, 0.02, "{:.4f}")
 
 ro = pd.read_csv(HERE / "renyi_order_test.csv")
 r1 = ro[(ro.domain == "diffusivity") & (ro.alpha == 1.0)].iloc[0]
