@@ -4,9 +4,10 @@ Each check prints [OK  ] or [FAIL] and the script exits non-zero if anything fai
 Part A needs nothing but numpy and scipy (exact algebra on random values).
 Part B reads the CSV outputs of the scripts in this folder:
   synthetic_profiles.csv        synthetic_profiles.py      (Table 1)
+  tensor_concept.csv            tensor_concept.py          (Figure 1, three tensors as distributions)
   direction_count.csv           direction_count.py         (entropies against the number of directions)
   order1_link.csv               order1_link.py             (order-1 profile against eigenvalue deficit)
-  reflections_maps_check.csv    build_reflections_maps.py  (Figure 2, voxelwise identities)
+  reflections_maps_check.csv    build_reflections_maps.py  (Figure 3, voxelwise identities)
   fa_vs_eigen_entropy.csv       fa_vs_eigen_entropy.py     (tensor interval in tissue)
   renyi_order_test.csv          renyi_order_test.py        (orders 1 and 2 in tissue)
   acquisition_counts.csv        acquisition_counts.py      (Section 5 acquisition facts)
@@ -254,11 +255,11 @@ pl, cr = tab.loc["planar (oblate)"], tab.loc["crossing 90 deg"]
 check_true("Table 1: planar vs 90 deg crossing, larger CV_D and smaller H~2 but larger H~inf",
            bool(pl.CV_D > cr.CV_D and pl.Hn_2 < cr.Hn_2 and pl.Hn_inf > cr.Hn_inf))
 
-check("Figure 1 H_2 = ln(3 - 2 FA^2): tissue identity error (from CSV, normalized)", float(fe_max) if (fe_max := pd.read_csv(HERE / "fa_vs_eigen_entropy.csv").identity_order2_max_abs_err.max()) is not None else 1.0, 0.0, 1e-12, "{:.1e}")
+check("Figure 2 H_2 = ln(3 - 2 FA^2): tissue identity error (from CSV, normalized)", float(fe_max) if (fe_max := pd.read_csv(HERE / "fa_vs_eigen_entropy.csv").identity_order2_max_abs_err.max()) is not None else 1.0, 0.0, 1e-12, "{:.1e}")
 
 rm = pd.read_csv(HERE / "reflections_maps_check.csv")
-check("Figure 2, voxelwise identities, max abs error", float(rm.max_abs_err.max()), 0.0, 1e-14, "{:.1e}")
-check("Figure 2, voxels checked, both rows about 387,000", float(abs(rm.n_vox.iloc[:2] - 387000).max()), 0, 1000, "{:.0f}")
+check("Figure 3, voxelwise identities, max abs error", float(rm.max_abs_err.max()), 0.0, 1e-14, "{:.1e}")
+check("Figure 3, voxels checked, both rows about 387,000", float(abs(rm.n_vox.iloc[:2] - 387000).max()), 0, 1000, "{:.0f}")
 
 fe = pd.read_csv(HERE / "fa_vs_eigen_entropy.csv")
 check("tissue voxels inside the interval, min share over subjects", float(fe.frac_inside_order1_envelope.min()), 1.0, 1e-9, "{:.4f}")
@@ -268,6 +269,14 @@ check("median tissue FA, lowest subject", float(fe.median_FA.min()), 0.19, 0.005
 check("median tissue FA, highest subject", float(fe.median_FA.max()), 0.21, 0.005, "{:.3f}")
 check_true("tensors are b = 1500 fits (median brain MD > 0.65e-3; the two-shell default gives about 0.57e-3)",
            bool((fe.median_MD_brain > 0.65e-3).all()))
+
+tc = pd.read_csv(HERE / "tensor_concept.csv").set_index("tensor")
+iso, pro, obl = tc.loc["isotropic"], tc.loc["prolate (linear)"], tc.loc["oblate (planar)"]
+check("Figure 1: isotropic tensor, H_1 = H_2 = ln 3", max(abs(iso.H1 - np.log(3)), abs(iso.H2 - np.log(3))), 0.0, 1e-12, "{:.1e}")
+check("Figure 1: prolate and oblate share FA 0.6", max(abs(pro.FA - 0.6), abs(obl.FA - 0.6)), 0.0, 1e-9, "{:.1e}")
+check("Figure 1: same FA gives the same H_2 and PR_lambda", max(abs(pro.H2 - obl.H2), abs(pro.PR - obl.PR)), 0.0, 1e-9, "{:.1e}")
+check_true("Figure 1: prolate and oblate differ in H_1 (0.952 against 0.895), modes +1 and -1",
+           bool(round(pro.H1, 3) == 0.952 and round(obl.H1, 3) == 0.895 and abs(pro["mode"] - 1) < 1e-9 and abs(obl["mode"] + 1) < 1e-9))
 
 ac = pd.read_csv(HERE / "acquisition_counts.csv")
 check_true("Sec 5: 93 directions at b = 1500 in all four subjects", bool((ac.n_b1500 == 93).all()) and len(ac) == 4)
