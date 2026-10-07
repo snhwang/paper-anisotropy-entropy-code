@@ -233,6 +233,22 @@ with np.errstate(invalid="ignore"):
     check_true("order 1 is undefined with a negative share", bool(np.isnan(-(lneg / lneg.sum() * np.log(lneg / lneg.sum())).sum())))
 
 # =============================================================================================
+# Supplement (derivations/derivations.pdf): items that appear only there
+def _d12(p, q):
+    return -2 * np.log(np.sum(np.sqrt(np.asarray(p) * np.asarray(q))))
+_p, _q, _r = (0.9, 0.1), (0.5, 0.5), (0.1, 0.9)
+check("Supplement: triangle example, Div_1/2(p||q) = Div_1/2(q||r) = 0.2231", max(abs(_d12(_p, _q) - 0.2231), abs(_d12(_q, _r) - 0.2231)), 0.0, 0.00005, "{:.5f}")
+check("Supplement: triangle example, Div_1/2(p||r) = 1.0217 > their sum", _d12(_p, _r), 1.0217, 0.00005, "{:.4f}")
+_worst = 0.0
+_e1 = np.array([2.0, -1.0, -1.0]) / np.sqrt(6); _e2 = np.array([0.0, 1.0, -1.0]) / np.sqrt(2)
+for _ in range(2000):
+    _l = np.sort(rng.uniform(0.05, 2.0, 3))[::-1]; _p3 = _l / _l.sum(); _dv = _p3 - 1 / 3
+    _phi = np.arctan2(_dv @ _e2, _dv @ _e1); _dev = _l - _l.mean()
+    _mode = 3 * np.sqrt(6) * np.prod(_dev) / np.linalg.norm(_dev) ** 3
+    _worst = max(_worst, abs(_mode - np.cos(3 * _phi)), abs((_p3 ** 2).sum() - (1 / 3 + _dv @ _dv)),
+                 0.0 if -1e-12 <= _phi <= np.pi / 3 + 1e-12 else 1.0)
+check("Supplement: mode = cos 3 phi and sum p^2 = 1/3 + |d|^2, phi in [0, pi/3]", _worst, 0.0, 1e-12, "{:.1e}")
+
 print("\nB. Numbers quoted from the analysis outputs")
 s = pd.read_csv(HERE / "synthetic_profiles.csv").set_index("case")
 TABLE = {  # case: FA, CV_D, H~1, H~2, H~inf   (as printed in Table 1)

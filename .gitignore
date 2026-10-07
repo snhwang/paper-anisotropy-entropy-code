@@ -11,3 +11,7 @@ analysis/synthetic_profiles_divergences.csv
 local_paths.json
 # HCP-A data placed inside the repository (controlled access, never commit)
 data/
+# LaTeX build files of the derivations
+derivations/*.aux
+derivations/*.log
+derivations/*.out

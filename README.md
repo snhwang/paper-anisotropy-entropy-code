@@ -22,6 +22,8 @@ The paper shows that diffusion anisotropy indices and entropies are one quantity
 
 The CSV outputs are committed, so `identity_checks.py` runs without the imaging data.
 
+`derivations/derivations.pdf` (source `derivations.tex`) is the paper's Supplementary Material. It derives every relation in the paper step by step, and each derivation names the check in `identity_checks.py` that verifies it.
+
 ## Installation
 
 The code was run with Python 3.12 (Linux) and 3.14 (Windows), with the package versions in `requirements.txt`.

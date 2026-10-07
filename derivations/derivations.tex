@@ -1,0 +1,394 @@
+% Supplementary Material: step-by-step derivations for
+% "Diffusion anisotropy and entropy: reflections of each other".
+% Every relation here is also checked numerically by analysis/identity_checks.py (check names in brackets).
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage[hidelinks]{hyperref}
+\usepackage{parskip}
+
+\newcommand{\Div}{\mathrm{Div}}
+\newcommand{\KL}{\Div_{\mathrm{KL}}}
+\newcommand{\CV}{\mathrm{CV}}
+\newcommand{\PR}{\mathrm{PR}}
+\newcommand{\FA}{\mathrm{FA}}
+\newcommand{\GFA}{\mathrm{GFA}}
+\newcommand{\tr}{\mathrm{tr}}
+\newcommand{\numcheck}[1]{\par{\small\raggedright\noindent\textit{Numerical check:} \texttt{#1}\par}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thesection}{S\arabic{section}}
+
+\title{Supplementary Material\\[4pt]
+\large Step-by-step derivations for ``Diffusion anisotropy and entropy: reflections of each other''}
+\author{Scott N. Hwang, Jonathan K. Maffie, Sangam G. Kanekar}
+\date{}
+
+\begin{document}
+\maketitle
+
+This document derives every relation stated in the paper, one step at a time, in the paper's notation.
+Equation numbers without an S refer to the paper. Each derivation ends with the name of the check in
+\texttt{analysis/identity\_checks.py} of the code repository that verifies it numerically.
+
+\section{Setup}
+
+Let $x_1,\ldots,x_K$ be positive numbers. Their mean is $\bar x = \frac1K\sum_i x_i$. The average of any
+quantity over $i$ is written $\langle\cdot\rangle$, so $\bar x = \langle x\rangle$. The standard deviation uses
+divisor $K$,
+\begin{equation}
+\sigma_x^2 = \tfrac1K\textstyle\sum_i (x_i-\bar x)^2 = \langle x^2\rangle - \bar x^2 ,
+\label{eq:var}
+\end{equation}
+and the coefficient of variation is $\CV_x = \sigma_x/\bar x$. Dividing Eq.~\eqref{eq:var} by $\bar x^2$ gives
+\begin{equation}
+\frac{\langle x^2\rangle}{\bar x^2} = 1 + \CV_x^2 .
+\label{eq:secondmoment}
+\end{equation}
+
+The proportions are $p_i = x_i/\sum_j x_j$. They are positive and sum to 1, so they form a probability
+distribution. When all values are equal, every $p_i$ equals $1/K$. This is the uniform distribution $u$, with
+$u_i = 1/K$. Because $\sum_j x_j = K\bar x$,
+\begin{equation}
+p_i = \frac{x_i}{K\bar x} .
+\label{eq:p}
+\end{equation}
+
+The R\'enyi entropy of order $\alpha\ne1$ is $H_\alpha(p) = (1-\alpha)^{-1}\ln\sum_i p_i^{\alpha}$. The Shannon
+entropy $H_1 = -\sum_i p_i\ln p_i$ is its limit as $\alpha\to1$ (Section~\ref{sec:order1}). The power mean of
+order $r\ne0$ is $M_r(x) = \langle x^r\rangle^{1/r}$, and $M_0 = \exp\langle\ln x\rangle$ is the geometric mean.
+$M_1 = \bar x$. The power mean increases with $r$, and all power means are equal only when all values are equal
+(the power-mean inequality).
+
+\section{The Jensen gap}
+
+The power-mean Jensen gap of order $\alpha$ (Eq.~1) is
+\begin{equation}
+J_\alpha(x) = \frac{\langle x^{\alpha}\rangle}{\bar x^{\,\alpha}} - 1 .
+\label{eq:J}
+\end{equation}
+Jensen's inequality says that for a convex function $\varphi$, $\langle\varphi(x)\rangle \ge \varphi(\bar x)$, with
+equality only when all values are equal. For a concave function the inequality reverses. The function
+$\varphi(x)=x^{\alpha}$ is convex for $\alpha>1$ and for $\alpha<0$, and concave for $0<\alpha<1$. So
+$\langle x^\alpha\rangle - \bar x^{\,\alpha}$, and with it $J_\alpha$, is positive for $\alpha>1$ and $\alpha<0$ and
+negative for $0<\alpha<1$, unless all values are equal. In both cases $J_\alpha$ has the sign of $\alpha(\alpha-1)$.
+
+Since $\langle x^\alpha\rangle = M_\alpha^{\,\alpha}$ and $\bar x = M_1$, the gap is also
+\begin{equation}
+1 + J_\alpha = \Bigl(\frac{M_\alpha}{M_1}\Bigr)^{\alpha} .
+\label{eq:Jpower}
+\end{equation}
+
+At order 2, Eq.~\eqref{eq:secondmoment} gives
+\begin{equation}
+J_2 = \frac{\langle x^2\rangle}{\bar x^2} - 1 = \CV_x^2 .
+\label{eq:J2}
+\end{equation}
+
+\section{The identity, Eq.~2}
+\label{sec:identity}
+
+\textbf{Step 1, the power sum.} Raise Eq.~\eqref{eq:p} to the power $\alpha$ and sum over $i$:
+\begin{equation}
+\sum_i p_i^{\alpha} = \frac{\sum_i x_i^{\alpha}}{(K\bar x)^{\alpha}}
+= \frac{K\langle x^{\alpha}\rangle}{K^{\alpha}\bar x^{\,\alpha}}
+= K^{1-\alpha}\,\frac{\langle x^{\alpha}\rangle}{\bar x^{\,\alpha}}
+= K^{1-\alpha}\,(1+J_\alpha) .
+\label{eq:powersum}
+\end{equation}
+
+\textbf{Step 2, the entropy.} Take $(1-\alpha)^{-1}\ln$ of Eq.~\eqref{eq:powersum}:
+\begin{equation}
+H_\alpha = \frac{1}{1-\alpha}\Bigl[(1-\alpha)\ln K + \ln(1+J_\alpha)\Bigr] = \ln K + \frac{\ln(1+J_\alpha)}{1-\alpha} .
+\end{equation}
+
+\textbf{Step 3, the entropy deficit.} Move $\ln K$ to the left:
+\begin{equation}
+\ln K - H_\alpha = \frac{\ln(1+J_\alpha)}{\alpha-1} .
+\label{eq:deficit}
+\end{equation}
+
+\textbf{Step 4, the divergence.} The R\'enyi divergence of $p$ from $u$ is
+$\Div_\alpha(p\,\|\,u) = (\alpha-1)^{-1}\ln\sum_i p_i^{\alpha}u_i^{1-\alpha}$. Since $u_i^{1-\alpha} = K^{\alpha-1}$ for
+every $i$,
+\begin{equation}
+\Div_\alpha(p\,\|\,u) = \frac{1}{\alpha-1}\Bigl[(\alpha-1)\ln K + \ln\sum_i p_i^{\alpha}\Bigr]
+= \ln K - \frac{\ln\sum_i p_i^{\alpha}}{1-\alpha} = \ln K - H_\alpha .
+\end{equation}
+
+\textbf{Step 5, the power-mean form.} Insert Eq.~\eqref{eq:Jpower} into Eq.~\eqref{eq:deficit}:
+\begin{equation}
+\ln K - H_\alpha = \frac{1}{\alpha-1}\ln\Bigl(\frac{M_\alpha}{M_1}\Bigr)^{\alpha} = \frac{\alpha}{\alpha-1}\ln\frac{M_\alpha}{M_1} .
+\end{equation}
+Steps 3 to 5 together are Eq.~2.
+
+\textbf{Step 6, the sign.} For $\alpha>1$, $M_\alpha\ge M_1$ and $\alpha/(\alpha-1)>0$, so the deficit is
+nonnegative. For $0<\alpha<1$, $M_\alpha\le M_1$, so the logarithm is nonpositive, and $\alpha/(\alpha-1)<0$, so
+the deficit is again nonnegative. In both cases it is zero only when all values are equal.
+
+\textbf{Step 7, monotonicity.} For fixed $\alpha$, the right side of Eq.~\eqref{eq:deficit} is a strictly monotone
+function of $J_\alpha$, increasing for $\alpha>1$ and decreasing for $\alpha<1$. Knowing one of the entropy deficit
+and the Jensen gap of the same order therefore fixes the other.
+\numcheck{Eq. 2 identity, every form, all orders | Eq. 2 derivation: sum p\^{}alpha = K\^{}(1-alpha)(1 + J\_alpha)}
+
+\section{Order 1, the Shannon case}
+\label{sec:order1}
+
+\textbf{The limit.} At $\alpha=1$ both $\ln\sum_ip_i^{\alpha}$ and $1-\alpha$ vanish. By l'H\^opital's rule, with
+$\frac{d}{d\alpha}\sum_i p_i^{\alpha} = \sum_i p_i^{\alpha}\ln p_i$ and $\sum_i p_i=1$,
+\begin{equation}
+H_1 = \lim_{\alpha\to1}\frac{\ln\sum_ip_i^{\alpha}}{1-\alpha} = \frac{\sum_i p_i\ln p_i}{-1} = -\sum_i p_i\ln p_i .
+\end{equation}
+
+\textbf{The deficit is the Kullback--Leibler divergence.} Since $\sum_ip_i=1$,
+\begin{equation}
+\ln K - H_1 = \sum_i p_i\ln K + \sum_i p_i\ln p_i = \sum_i p_i\ln\frac{p_i}{1/K} = \KL(p\,\|\,u) .
+\end{equation}
+
+\textbf{In terms of the values.} By Eq.~\eqref{eq:p}, $Kp_i = x_i/\bar x$, so
+\begin{equation}
+\ln K - H_1 = \sum_i p_i\ln\frac{x_i}{\bar x} = \sum_i p_i\ln x_i - \ln\bar x .
+\label{eq:theil}
+\end{equation}
+This is Theil's index of the shares $p_i$.
+
+\textbf{The Jensen gap of $x\ln x$.} For $\varphi(x)=x\ln x$, again using Eq.~\eqref{eq:p},
+\begin{equation}
+\frac{\langle x\ln x\rangle - \bar x\ln\bar x}{\bar x} = \sum_i\frac{x_i}{K\bar x}\ln x_i - \ln\bar x
+= \sum_i p_i\ln x_i - \ln\bar x ,
+\end{equation}
+which is Eq.~\eqref{eq:theil}.
+
+\textbf{The reverse direction.} With the roles of $p$ and $u$ exchanged,
+\begin{equation}
+\KL(u\,\|\,p) = \sum_i\frac1K\ln\frac{1/K}{p_i} = -\Bigl\langle\ln\frac{x}{\bar x}\Bigr\rangle = \ln\bar x - \langle\ln x\rangle = \ln\frac{M_1}{M_0} .
+\label{eq:reverse}
+\end{equation}
+It can also be written $\KL(u\,\|\,p) = H(u,p) - \ln K$, where $H(u,p) = -\sum_i u_i\ln p_i$ is the cross-entropy
+of $u$ relative to $p$, not an entropy of $p$.
+\numcheck{uniform log gap ln(mean) - mean(ln) = KL(u||p) | Shannon deficit = Jensen gap of x ln x, scaled by mean}
+
+\section{Other special orders}
+
+\textbf{Order $\infty$.} As $\alpha\to\infty$, the largest proportion dominates $\sum_ip_i^{\alpha}$. If $m$
+proportions share the largest value $p_{\max}$, then $\sum_ip_i^{\alpha} = m\,p_{\max}^{\alpha}(1+o(1))$, and
+\begin{equation}
+H_\infty = \lim_{\alpha\to\infty}\frac{\ln m + \alpha\ln p_{\max}}{1-\alpha} = -\ln p_{\max} ,
+\qquad
+\ln K - H_\infty = \ln(Kp_{\max}) = \ln\frac{x_{\max}}{\bar x} .
+\end{equation}
+\numcheck{order inf: ln K - H\_inf = ln(max x / mean x)}
+
+\textbf{Order 2.} Eq.~\eqref{eq:powersum} with $\alpha=2$ and Eq.~\eqref{eq:J2} give
+$\sum_ip_i^{2} = (1+\CV_x^2)/K$. Then
+\begin{equation}
+\ln K - H_2 = \ln(1+\CV_x^2), \qquad \PR = \frac{1}{\sum_ip_i^2} = \frac{K}{1+\CV_x^2},
+\qquad \frac{\PR}{K} = \frac{1}{1+\CV_x^2} .
+\label{eq:order2}
+\end{equation}
+
+\textbf{The chi-squared divergence.} Expanding the square and using $\sum_ip_i=1$,
+\begin{equation}
+\sum_i\frac{(p_i-u_i)^2}{u_i} = K\sum_i\Bigl(p_i^2 - \frac{2p_i}{K} + \frac{1}{K^2}\Bigr) = K\sum_ip_i^2 - 2 + 1
+= (1+\CV_x^2) - 1 = \CV_x^2 .
+\end{equation}
+\numcheck{order 2: PR/K = 1/(1+CV\^{}2) | order 2: CV\^{}2 = chi\^{}2(p||u)}
+
+\section{The geometric form, Eq.~3}
+
+Let $\theta$ be the angle between the vector $x=(x_1,\ldots,x_K)$ and the isotropic direction $\mathbf 1=(1,\ldots,1)$.
+Then
+\begin{equation}
+\cos^2\theta = \frac{(x\cdot\mathbf 1)^2}{|x|^2|\mathbf 1|^2} = \frac{(\sum_ix_i)^2}{K\sum_ix_i^2}
+= \frac{K^2\bar x^2}{K\cdot K\langle x^2\rangle} = \frac{\bar x^2}{\langle x^2\rangle} = \frac{1}{1+\CV_x^2} = \frac{\PR}{K} ,
+\end{equation}
+using Eqs.~\eqref{eq:secondmoment} and \eqref{eq:order2}. Then $\tan^2\theta = 1/\cos^2\theta - 1 = \CV_x^2$, and
+since the values are positive, $0\le\theta<\pi/2$ and $\tan\theta = \CV_x$. Also
+$\sin^2\theta = 1-\cos^2\theta = \CV_x^2/(1+\CV_x^2)$.
+\numcheck{PR/K = cos\^{}2 theta | CV = tan theta}
+
+\section{Near isotropy, Eq.~4}
+
+Write $x_i = \bar x(1+\varepsilon_i)$. Averaging gives $\langle\varepsilon\rangle = 0$, and
+$\langle\varepsilon^2\rangle = \sigma_x^2/\bar x^2 = \CV_x^2$. Expanding $(1+\varepsilon_i)^{\alpha}$ to second order,
+\begin{equation}
+1+J_\alpha = \langle(1+\varepsilon)^{\alpha}\rangle
+= 1 + \alpha\langle\varepsilon\rangle + \tfrac12\alpha(\alpha-1)\langle\varepsilon^2\rangle + O(\varepsilon^3)
+= 1 + \tfrac12\alpha(\alpha-1)\,\CV_x^2 + O(\varepsilon^3) .
+\end{equation}
+Since $\ln(1+J) = J + O(J^2)$, Eq.~\eqref{eq:deficit} gives
+\begin{equation}
+\ln K - H_\alpha = \frac{J_\alpha}{\alpha-1} + O(\varepsilon^3) = \frac{\alpha}{2}\,\CV_x^2 + O(\varepsilon^3) .
+\end{equation}
+The coefficient of the cubic term grows with $\alpha$, so the approximation is not uniform in the order. At
+$\alpha=\infty$ the deficit $\ln(x_{\max}/\bar x) = \ln(1+\varepsilon_{\max})\approx\varepsilon_{\max}$ is first order.
+\numcheck{second-order form overstates the order-2 member at CV 0.544 (fraction)}
+
+\section{Divergences are not metrics}
+
+A metric must be symmetric and satisfy the triangle inequality. At order $\tfrac12$,
+$\Div_{1/2}(p\,\|\,q) = -2\ln\sum_i\sqrt{p_iq_i}$, which is symmetric in $p$ and $q$. It fails the triangle
+inequality. For two outcomes, take $p=(0.9,0.1)$, $q=(0.5,0.5)$ and $r=(0.1,0.9)$. Then
+$\Div_{1/2}(p\,\|\,q) = \Div_{1/2}(q\,\|\,r) = 0.2231$, but $\Div_{1/2}(p\,\|\,r) = -2\ln0.6 = 1.0217$, which exceeds
+their sum. Other positive orders are not symmetric. For example, at order 1,
+$\KL(p\,\|\,u) \ne \KL(u\,\|\,p)$ in general, as Section~\ref{sec:order1} shows.
+\numcheck{order 1/2 is symmetric | orders 1, 2 and 4 are asymmetric | order 1/2 fails the triangle inequality | Supplement: triangle example}
+
+\section{The diffusion tensor}
+
+Take $x=\lambda$, the eigenvalues of the tensor, with $K=3$, mean $\bar\lambda$ and normalized eigenvalues
+$p^{(\lambda)}_i = \lambda_i/\sum_j\lambda_j$.
+
+\textbf{FA, Eq.~5.} Fractional anisotropy is $\FA^2 = \tfrac32\sum_i(\lambda_i-\bar\lambda)^2/\sum_i\lambda_i^2$. With
+divisor 3, $\sum_i(\lambda_i-\bar\lambda)^2 = 3\sigma_\lambda^2 = 3\bar\lambda^2\CV_\lambda^2$ and, by
+Eq.~\eqref{eq:secondmoment}, $\sum_i\lambda_i^2 = 3\langle\lambda^2\rangle = 3\bar\lambda^2(1+\CV_\lambda^2)$. So
+\begin{equation}
+\FA^2 = \frac32\,\frac{\CV_\lambda^2}{1+\CV_\lambda^2} .
+\end{equation}
+By Eq.~\eqref{eq:order2}, $\Div_2 = \ln3 - H_2 = \ln(1+\CV_\lambda^2)$, so $e^{-\Div_2} = 1/(1+\CV_\lambda^2)$ and
+$1-e^{-\Div_2} = \CV_\lambda^2/(1+\CV_\lambda^2)$. Hence
+\begin{equation}
+\FA^2 = \tfrac32\bigl(1-e^{-\Div_2}\bigr) = \tfrac32\bigl(1-\PR_\lambda/3\bigr) = \tfrac32\sin^2\theta ,
+\end{equation}
+since $\PR_\lambda/3 = e^{-\Div_2}$ (Eq.~\eqref{eq:order2}) and $\sin^2\theta = \CV_\lambda^2/(1+\CV_\lambda^2)$.
+
+\textbf{FA and the order-2 entropy.} From $\FA^2 = \tfrac32(1 - e^{H_2}/3)$, solve for $H_2$:
+$e^{H_2} = 3 - 2\FA^2$, so
+\begin{equation}
+H_2 = \ln(3-2\FA^2), \qquad \ln3 - H_2 = -\ln\bigl(1 - \tfrac23\FA^2\bigr) .
+\end{equation}
+Near isotropy the second form is $\tfrac23\FA^2$ to leading order.
+\numcheck{tensor orders, FA, QA and VR relations | ln 3 - H\_2(lambda) = -ln(1 - 2 FA\^{}2/3)}
+
+\textbf{The trace form of \"Ozarslan et al.} The trace-normalized tensor $R = \mathbf D/\tr\mathbf D$ has eigenvalues
+$p^{(\lambda)}_i$, so $\tr R^2 = \sum_i(p^{(\lambda)}_i)^2 = e^{-H_2}$. Then
+$\FA^2 = \tfrac32\bigl(1 - 1/(3\tr R^2)\bigr)$, which is $\FA = \sqrt{(3-1/\tr R^2)/2}$.
+\numcheck{Ozarslan Eq. 11, FA from trace(R\^{}2), and trace(R\^{}2) = exp(-H\_2)}
+
+\textbf{Procrustes anisotropy.} Dryden et al.\ define PA as FA computed on $q_i = \sqrt{\lambda_i}$. Since
+$\sum_i(q_i-\bar q)^2 = \sum_iq_i^2 - 3\bar q^2$ and $\sum_iq_i^2 = \sum_i\lambda_i$,
+\begin{equation}
+\mathrm{PA}^2 = \frac32\Bigl(1 - \frac{(\sum_iq_i)^2}{3\sum_iq_i^2}\Bigr) .
+\end{equation}
+At order $\tfrac12$, with $u_i^{1/2} = 3^{-1/2}$,
+$\Div_{1/2} = -2\ln\sum_i\sqrt{p^{(\lambda)}_i/3} = \ln3 - 2\ln\sum_i\sqrt{p^{(\lambda)}_i}$, so
+$e^{-\Div_{1/2}} = (\sum_i\sqrt{p^{(\lambda)}_i})^2/3$. Since $\sqrt{p^{(\lambda)}_i} = q_i/\sqrt{\sum_j\lambda_j}$,
+$(\sum_i\sqrt{p^{(\lambda)}_i})^2 = (\sum_iq_i)^2/\sum_iq_i^2$. Therefore
+$\mathrm{PA}^2 = \tfrac32\bigl(1-e^{-\Div_{1/2}}\bigr)$.
+\numcheck{Procrustes anisotropy (Dryden 2009): PA\^{}2 = (3/2)(1 - exp(-Div\_1/2))}
+
+\textbf{Relative anisotropy.} In one common convention $\mathrm{RA} = \sqrt{\sum_i(\lambda_i-\bar\lambda)^2}/(\sqrt3\,\bar\lambda)
+= \sigma_\lambda/\bar\lambda = \CV_\lambda$. Other conventions multiply this by a constant.
+
+\textbf{Quantitative anisotropy, Eq.~6.} By Eq.~\eqref{eq:theil} with $x=\lambda$,
+$\ln3 - H_1(p^{(\lambda)}) = \sum_ip^{(\lambda)}_i\ln\lambda_i - \ln\bar\lambda$. The von Neumann entropy of $R$ is
+$-\tr(R\ln R) = -\sum_ip^{(\lambda)}_i\ln p^{(\lambda)}_i = H_1(p^{(\lambda)})$, because $R$ has eigenvalues
+$p^{(\lambda)}_i$. So the order-1 member is $\ln3$ minus the von Neumann entropy of $R$.
+
+\textbf{The volume ratio.} $\mathrm{VR} = \lambda_1\lambda_2\lambda_3/\bar\lambda^3$. The geometric mean is
+$M_0 = (\lambda_1\lambda_2\lambda_3)^{1/3}$, so $\mathrm{VR} = (M_0/M_1)^3$, and by Eq.~\eqref{eq:reverse}
+\begin{equation}
+-\tfrac13\ln\mathrm{VR} = \ln\frac{M_1}{M_0} = \KL(u\,\|\,p^{(\lambda)}) .
+\end{equation}
+
+\textbf{FA and tensor mode fix the normalized eigenvalues.} The normalized eigenvalues sum to 1, so they have two
+degrees of freedom. Write $d = p^{(\lambda)} - u$. Its components sum to zero, so $d$ lies in a plane, and $d$ is
+orthogonal to $u$. Hence $\sum_i(p^{(\lambda)}_i)^2 = |u|^2 + |d|^2 = \tfrac13 + |d|^2$, and $|d|$ fixes
+$\sum_i(p^{(\lambda)}_i)^2$ and therefore FA. In the plane, use the orthonormal basis
+$e_1 = (2,-1,-1)/\sqrt6$, $e_2 = (0,1,-1)/\sqrt2$ and write $d = |d|(\cos\phi\,e_1 + \sin\phi\,e_2)$. The product of
+the components of $d$ is $|d|^3\cos3\phi/(3\sqrt6)$, so the tensor mode, $3\sqrt6\prod_id_i/|d|^3$, equals
+$\cos3\phi$. With $\lambda_1\ge\lambda_2\ge\lambda_3$, $\phi$ runs from 0 (linear, mode $+1$) to $\pi/3$ (planar, mode
+$-1$), and $\cos3\phi$ is one-to-one on that range. So FA fixes $|d|$, mode fixes $\phi$, and together they fix
+$p^{(\lambda)}$ and every entropy of it.
+\numcheck{Supplement: mode = cos 3 phi and sum p\^{}2 = 1/3 + |d|\^{}2}
+
+\section{The directional profile}
+
+\textbf{GFA, Eq.~7.} For $N$ values $D_i$, Tuch's generalized fractional anisotropy is the standard deviation, with
+divisor $N-1$, over the root mean square:
+\begin{equation}
+\GFA^2 = \frac{N\sum_i(D_i-\bar D)^2}{(N-1)\sum_iD_i^2} = \frac{N}{N-1}\,\frac{N\sigma_D^2}{N\langle D^2\rangle}
+= \frac{N}{N-1}\,\frac{\CV_D^2}{1+\CV_D^2} .
+\end{equation}
+By Eq.~\eqref{eq:order2} and the geometric form this equals $\frac{N}{N-1}(1-\PR/N) = \frac{N}{N-1}\sin^2\theta$.
+With $N=3$ the prefactor is $\tfrac32$ and this is Eq.~5.
+
+\textbf{The CVD of Aja-Fern\'andez et al.} With $\log E_i = -bD_i$, their sample variance and second moment are
+\begin{equation}
+\mathcal V = \frac{N}{N-1}\bigl[\langle(\log E)^2\rangle - \langle\log E\rangle^2\bigr] = \frac{N}{N-1}\,b^2\sigma_D^2,
+\qquad \langle(\log E)^2\rangle = b^2\langle D^2\rangle .
+\end{equation}
+So $\mathrm{CVD}^2 = \mathcal V/\langle(\log E)^2\rangle = \frac{N}{N-1}\,\sigma_D^2/\langle D^2\rangle = \GFA^2$.
+\numcheck{CVD\^{}2 of Aja-Fernandez 2018 = GFA\^{}2 of the profile, Eq. (7)}
+
+\textbf{The signal domain.} The signals $S_i/S_0 = e^{-bD_i}$ are positive, so the identity applies to them as
+well. Near isotropy write $D_i = \bar D + \delta_i$ with $\langle\delta\rangle = 0$ and $\langle\delta^2\rangle =
+\sigma_D^2$. Then $e^{-bD_i} = e^{-b\bar D}e^{-b\delta_i} \approx e^{-b\bar D}(1-b\delta_i)$. The signals have mean
+$\approx e^{-b\bar D}$ and standard deviation $\approx e^{-b\bar D}b\sigma_D$, so their coefficient of variation is
+$\approx b\sigma_D$. By Section~S7 the entropy deficits of the two domains are $\approx\frac{\alpha}{2}\CV_D^2$ and
+$\approx\frac{\alpha}{2}(b\sigma_D)^2$, and their ratio is
+\begin{equation}
+\frac{(b\sigma_D)^2}{(\sigma_D/\bar D)^2} = (b\bar D)^2 .
+\end{equation}
+\numcheck{Sec 4.1 near isotropy: signal/diffusivity deficit ratio vs (b Dbar)\^{}2}
+
+\section{The link to the tensor, Eq.~8}
+
+For a single Gaussian compartment the profile is $D(\hat g) = \hat g^{\top}\mathbf D\,\hat g$. Averages over the unit
+sphere of products of the components of $\hat g$ are
+\begin{equation}
+\langle g_ig_j\rangle = \tfrac13\delta_{ij}, \qquad
+\langle g_ig_jg_kg_l\rangle = \tfrac{1}{15}\bigl(\delta_{ij}\delta_{kl} + \delta_{ik}\delta_{jl} + \delta_{il}\delta_{jk}\bigr) .
+\end{equation}
+The mean of the profile is
+$\langle D\rangle = \sum_{ij}D_{ij}\langle g_ig_j\rangle = \tr\mathbf D/3 = \bar\lambda$. Its mean square is
+\begin{equation}
+\langle D^2\rangle = \sum_{ijkl}D_{ij}D_{kl}\langle g_ig_jg_kg_l\rangle
+= \tfrac{1}{15}\bigl[(\tr\mathbf D)^2 + 2\tr\mathbf D^2\bigr]
+= \tfrac{1}{15}\bigl[9\bar\lambda^2 + 2\textstyle\sum_i\lambda_i^2\bigr] .
+\end{equation}
+Its variance is
+\begin{equation}
+\langle D^2\rangle - \langle D\rangle^2 = \tfrac{1}{15}\bigl[2\textstyle\sum_i\lambda_i^2 - 6\bar\lambda^2\bigr]
+= \tfrac{2}{15}\textstyle\sum_i(\lambda_i-\bar\lambda)^2 = \tfrac25\sigma_\lambda^2 ,
+\end{equation}
+using $\sum_i(\lambda_i-\bar\lambda)^2 = \sum_i\lambda_i^2 - 3\bar\lambda^2 = 3\sigma_\lambda^2$. Dividing by
+$\bar\lambda^2$,
+\begin{equation}
+\CV_D^2 = \tfrac25\,\CV_\lambda^2 .
+\end{equation}
+Equal-weight averages over $N$ near-uniform directions approximate these sphere averages.
+
+\textbf{The linear limit.} For $\lambda\propto(1,0,0)$, $\CV_\lambda^2 = 2$ and $\CV_D^2 = \tfrac45$. The normalized
+second moments are $1+\CV_\lambda^2 = 3$ and $1+\CV_D^2 = \tfrac95$, whose ratio is $\tfrac35$, the value
+\"Ozarslan et al.\ report for the profile against the eigenvalues.
+\numcheck{CV\_D\^{}2 / CV\_lambda\^{}2 on a dense sphere, 50 random tensors | linear tensor: profile's normalized second moment / eigenvalues' = 3/5}
+
+\section{The order-1 link between profile and tensor}
+
+In the eigenvector basis, $D(\hat g) = \sum_iw_i(\hat g)\lambda_i$ with $w_i(\hat g) = (\hat g\cdot e_i)^2\ge0$ and
+$\sum_iw_i = 1$. So each direction's diffusivity is a weighted mean of the eigenvalues. Let $f(x) = x\ln x$, which is
+convex. Jensen's inequality for each direction gives $f(D(\hat g)) \le \sum_iw_i(\hat g)f(\lambda_i)$. Averaging over the
+sphere, with $\langle w_i\rangle = \tfrac13$,
+\begin{equation}
+\langle f(D)\rangle \le \tfrac13\textstyle\sum_if(\lambda_i) = \langle f(\lambda)\rangle .
+\end{equation}
+The profile and the eigenvalues have the same mean $\bar\lambda$, so subtracting $f(\bar\lambda)$ and dividing by
+$\bar\lambda$ turns both sides into order-1 deficits (Section~\ref{sec:order1}). The profile's order-1 deficit is
+therefore at most the eigenvalues', with equality only at isotropy. Near isotropy both deficits are
+$\approx\tfrac12\CV^2$, so their ratio tends to $\CV_D^2/\CV_\lambda^2 = \tfrac25$.
+\numcheck{order-1 link: Jensen violations over the eigenvalue simplex | order-1 link: median ratio near isotropy (FA < 0.05)}
+
+\section{The chain rule at order 1}
+
+Split the $K$ values into groups $g$. Let $P_g = \sum_{i\in g}p_i$ be a group's proportion of the total and
+$U_g = |g|/K$ its fraction of the values. Within a group, $p_{i|g} = p_i/P_g$ and $u_{i|g} = 1/|g|$, so
+$p_i = P_gp_{i|g}$ and $u_i = U_gu_{i|g}$. Then
+\begin{equation}
+\KL(p\,\|\,u) = \sum_g\sum_{i\in g}P_gp_{i|g}\Bigl[\ln\frac{P_g}{U_g} + \ln\frac{p_{i|g}}{u_{i|g}}\Bigr]
+= \KL(P\,\|\,U) + \sum_gP_g\,\KL(p_{\cdot|g}\,\|\,u_{\cdot|g}) ,
+\end{equation}
+using $\sum_{i\in g}p_{i|g} = 1$. The order-1 deficit is the proportion-weighted mean of the within-group deficits
+plus the divergence of the groups' proportions from their fractions of the values.
+\numcheck{order-1 deficit = share-weighted within-group deficits + between-group divergence}
+
+\end{document}
