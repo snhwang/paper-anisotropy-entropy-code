@@ -278,6 +278,30 @@ check("Figure 1: same FA gives the same H_2 and PR_lambda", max(abs(pro.H2 - obl
 check_true("Figure 1: prolate and oblate differ in H_1 (0.952 against 0.895), modes +1 and -1",
            bool(round(pro.H1, 3) == 0.952 and round(obl.H1, 3) == 0.895 and abs(pro["mode"] - 1) < 1e-9 and abs(obl["mode"] + 1) < 1e-9))
 
+check("Sec 3.1 worked example: prolate p = (0.598, 0.201, 0.201)", max(abs(pro.p1 - 0.598), abs(pro.p2 - 0.201), abs(pro.p3 - 0.201)), 0.0, 0.0005, "{:.4f}")
+check("Sec 3.1 worked example: sum p^2 = 0.439", float(pro.p1 ** 2 + pro.p2 ** 2 + pro.p3 ** 2), 0.439, 0.0005, "{:.4f}")
+check("Sec 3.1 worked example: H_2 = 0.824, PR = 2.28", max(abs(pro.H2 - 0.824), abs(pro.PR - 2.28) / 10), 0.0, 0.0005, "{:.4f}")
+check("Sec 3.1 worked example: FA from PR, sqrt(3/2 (1 - PR/3)) = 0.60", float(np.sqrt(1.5 * (1 - pro.PR / 3))), 0.60, 0.0005, "{:.4f}")
+
+# Sec 4.1: signal-domain against diffusivity-domain entropy deficits, near isotropy
+def _fib(n):
+    i = np.arange(n) + 0.5; ph = np.arccos(1 - 2 * i / n); th = np.pi * (1 + 5 ** 0.5) * i
+    return np.stack([np.cos(th) * np.sin(ph), np.sin(th) * np.sin(ph), np.cos(ph)], 1)
+_G = _fib(93); _b = 1500.0
+def _deficits(l):
+    Dp = np.einsum("ij,jk,ik->i", _G, np.diag(np.asarray(l) * 1e-3), _G)
+    out = []
+    for x in (Dp, np.exp(-_b * Dp)):
+        q = x / x.sum(); out.append(np.log(len(x)) + (q * np.log(q)).sum())
+    return out[0], out[1], (_b * Dp.mean()) ** 2
+dD, dS, bd2 = _deficits((0.85, 0.78, 0.77))
+check("Sec 4.1 near isotropy: signal/diffusivity deficit ratio vs (b Dbar)^2", float(dS / dD / bd2), 1.0, 0.02, "{:.3f}")
+
+ro_d = pd.read_csv(HERE / "renyi_order_test.csv"); ro_d = ro_d[ro_d.domain == "diffusivity"].set_index("alpha")
+check_true("Sec 5: split-half reliability 0.95 to 0.96 for orders 1 to 5",
+           bool(all(0.945 <= ro_d.loc[a, "split_half"] < 0.965 for a in (1.0, 2.0, 3.0, 5.0))))
+check("Sec 5: split-half reliability at order 10", float(ro_d.loc[10.0, "split_half"]), 0.93, 0.005, "{:.3f}")
+
 ac = pd.read_csv(HERE / "acquisition_counts.csv")
 check_true("Sec 5: 93 directions at b = 1500 in all four subjects", bool((ac.n_b1500 == 93).all()) and len(ac) == 4)
 check_true("Sec 5: 14 b ~ 0 volumes, interleaved through the series (largest gap under 10% of the volumes)",
