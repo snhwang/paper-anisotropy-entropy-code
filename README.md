@@ -8,14 +8,14 @@ The paper shows that diffusion anisotropy indices and entropies are one quantity
 
 | Script | Paper item | Output | Needs imaging data |
 |---|---|---|---|
-| `analysis/identity_checks.py` | every relation and quoted number, and the Discussion's worked numbers (scale of the order-2 deficit, region averages, effective numbers), which it computes directly | console report, non-zero exit on failure | no |
-| `analysis/tensor_concept.py` | Figure 1, three tensors as distributions of their normalized eigenvalues | `tensor_concept.{png,pdf}`, `tensor_concept.csv` | no |
+| `analysis/identity_checks.py` | every relation and quoted number, the signal-domain factor (b D̄)² of Section 4.1, and the Discussion's worked numbers (scale of the order-2 deficit, region averages, effective numbers), which it computes directly | console report, non-zero exit on failure | no |
+| `analysis/tensor_concept.py` | Figure 1, three tensors as distributions of their normalized eigenvalues, and the worked example of Section 3.1 | `tensor_concept.{png,pdf}`, `tensor_concept.csv` | no |
 | `analysis/synthetic_profiles.py` | Table 1 and Section 4.3 (synthetic voxels), the two-fifths ratio on 93 directions in Section 4.2 | `synthetic_profiles.csv` | no |
 | `analysis/order1_link.py` | Section 4.2, order-1 profile deficit against the eigenvalue deficit | `order1_link.csv` | no |
 | `analysis/direction_count.py` | Discussion, dependence on the number of directions | `direction_count.csv` | no |
 | `analysis/fa_vs_eigen_entropy.py` | Figure 2, and the tissue numbers of Sections 3.2 and 5 (FA against the eigenvalue entropy, ordering by tensor mode, median FA) | `fa_vs_eigen_entropy.{png,pdf}`, `fa_vs_eigen_entropy.csv` | yes |
 | `analysis/build_reflections_maps.py` | Figure 3 and its voxelwise identities | `reflections_maps.{png,pdf}`, `reflections_maps_check.csv` | yes |
-| `analysis/renyi_order_test.py` | Abstract and Section 5, order-1 against order-2 directional entropies in tissue | `renyi_order_test.csv` | yes |
+| `analysis/renyi_order_test.py` | Abstract and Section 5, order-1 against order-2 directional entropies in tissue, and split-half reliability across orders | `renyi_order_test.csv` | yes |
 | `analysis/acquisition_counts.py` | Section 5, number of directions and of b ≈ 0 volumes, near-uniform sampling | `acquisition_counts.csv` | yes |
 | `analysis/b1500_tensor.py` | helper, b = 1500 tensor fit used by the figure scripts | cached eigenvalues in `analysis/_cache/` | yes |
 | `analysis/paths.py` | helper, data and output locations | none | no |
