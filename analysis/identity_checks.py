@@ -56,16 +56,22 @@ def fa(lam):
 
 # =============================================================================================
 print("A. Exact algebra")
-# A1. the identity at every order, for arbitrary positive values
-worst = 0.0
+# A1. the identity, Eq. 2, at every order for arbitrary positive values: every form of the labeled equation
+# (entropy deficit = Renyi divergence from uniform = ln(1 + J)/(alpha - 1) = alpha/(alpha - 1) ln(M_alpha/M_1))
+# and the derivation line before it, sum p^alpha = K^(1 - alpha) (1 + J_alpha)
+worst = worst_sum = 0.0
 for _ in range(2000):
-    K = int(rng.integers(2, 120)); x = rng.uniform(0.05, 5.0, K) ** rng.uniform(0.5, 3.0); p = x / x.sum()
+    K = int(rng.integers(2, 120)); x = rng.uniform(0.05, 5.0, K) ** rng.uniform(0.5, 3.0); p = x / x.sum(); u = np.full(K, 1.0 / K)
     for a in (-2.0, -1.0, 0.5, 2.0, 3.0, 7.0):
         J = (x ** a).mean() / x.mean() ** a - 1
         lhs = np.log(K) - renyi(p, a)
-        worst = max(worst, abs(lhs - np.log1p(J) / (a - 1)), abs(lhs - a / (a - 1) * np.log(((x ** a).mean()) ** (1 / a) / x.mean())))
+        divergence = np.log((p ** a * u ** (1 - a)).sum()) / (a - 1)
+        worst = max(worst, abs(lhs - divergence), abs(lhs - np.log1p(J) / (a - 1)),
+                    abs(lhs - a / (a - 1) * np.log(((x ** a).mean()) ** (1 / a) / x.mean())))
+        worst_sum = max(worst_sum, abs((p ** a).sum() / (K ** (1 - a) * (1 + J)) - 1))
     worst = max(worst, abs(np.log(K) - renyi(p, 1) - ((p * np.log(x)).sum() - np.log(x.mean()))))
-check("identity (all orders, 2000 random sets), max abs error", worst, 0.0, 1e-10, "{:.1e}")
+check("Eq. 2 identity, every form, all orders (2000 random sets), max abs error", worst, 0.0, 1e-10, "{:.1e}")
+check("Eq. 2 derivation: sum p^alpha = K^(1-alpha)(1 + J_alpha), max rel error", worst_sum, 0.0, 1e-10, "{:.1e}")
 
 # A2. anchors
 x = rng.uniform(0.1, 3, 40); p = x / x.sum(); K = x.size; cv2 = x.var() / x.mean() ** 2
