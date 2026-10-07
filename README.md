@@ -61,10 +61,21 @@ python analysis/identity_checks.py
 
 The in-tissue results use the Lifespan Human Connectome Project in Aging (HCP-A) data in the consortium's minimally preprocessed form. The data are distributed through the BALSA repository (https://balsa.wustl.edu) under the AABC Data Use Terms. They are not included here.
 
-The data scripts expect two inputs, located through environment variables (see `analysis/paths.py`).
+The data scripts expect two inputs.
 
-- `INFO_DATA` is a folder holding `HCP/manifest_n1379_b1500.tsv`, a tab-separated list of processed sessions with a `session_id` column. The paper uses its first four rows. Participant identifiers are withheld under the AABC Data Use Terms, so the manifest is not included.
-- `DTI_OUTPUT_DIR` is a folder with one subfolder per session. Each holds `inputs/dwi.bval` and `processed/dwi_raw.nii.gz`, `processed/dwi_raw.bvec` and `processed/mask.nii.gz`.
+- A manifest, `HCP/manifest_n1379_b1500.tsv`, a tab-separated list of processed sessions with a `session_id` column. The paper uses its first four rows. Participant identifiers are withheld under the AABC Data Use Terms, so the manifest is not included.
+- One folder per session. Each holds `inputs/dwi.bval` and `processed/dwi_raw.nii.gz`, `processed/dwi_raw.bvec` and `processed/mask.nii.gz`.
+
+By default the manifest is read from `data/HCP/` and the session folders from `data/dti_output/` in this repository. Git ignores `data/`, so the data are never committed. To keep the data elsewhere, set the environment variables `INFO_DATA` (the folder above `HCP/`) and `DTI_OUTPUT_DIR`, or put them in a `local_paths.json` file in the repository root, which git also ignores.
+
+```
+{
+  "INFO_DATA": "/path/to/folder/holding/HCP",
+  "DTI_OUTPUT_DIR": {"nt": "D:/dti_output", "posix": "/mnt/d/dti_output"}
+}
+```
+
+A value is either one path or one path per platform, keyed `nt` (Windows) and `posix`. See `analysis/paths.py`.
 
 Tensor eigenvalues come from a DIPY weighted least-squares fit to the b ≈ 0 and b = 1500 s/mm² volumes (`b1500_tensor.py`). The fits are cached in `analysis/_cache/`, which is not tracked.
 
