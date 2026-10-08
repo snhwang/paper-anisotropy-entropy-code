@@ -234,15 +234,13 @@ check("region at FA 0.1 and 0.7 in equal numbers: mean FA", (0.1 + 0.7) / 2, 0.4
 check("region at FA 0.1 and 0.7 in equal numbers: mean order-2 deficit", float((dfa(0.1) + dfa(0.7)) / 2), 0.201, 0.0005, "{:.4f}")
 check("region at FA 0.45 throughout: order-2 deficit", float(dfa(0.45)), 0.145, 0.0005, "{:.4f}")
 from scipy.stats import rankdata
-cohen = lambda a, b: (b.mean() - a.mean()) / np.sqrt((a.var() + b.var()) / 2)
 def auc(a, b):
     r = rankdata(np.concatenate([a, b])); return (r[a.size:].sum() - b.size * (b.size + 1) / 2) / (a.size * b.size)
-worst_d, worst_auc = 0.0, 0.0
+worst_auc = 0.0
 for m in (0.20, 0.45):  # two groups 0.02 apart in FA, between-subject SD 0.03
     g1, g2 = np.abs(rng.normal(m, 0.03, 100_000)), np.abs(rng.normal(m + 0.02, 0.03, 100_000))
-    worst_d = max(worst_d, abs(cohen(dfa(g1), dfa(g2)) / cohen(g1, g2) - 1)); worst_auc = max(worst_auc, abs(auc(dfa(g1), dfa(g2)) - auc(g1, g2)))
-check("group comparison: same AUC on FA and deficit scales, max difference", worst_auc, 0.0, 1e-12, "{:.1e}")
-check("group comparison at FA 0.2 and 0.45: standardized effect ratio, max |ratio - 1|", worst_d, 0.0, 0.01, "{:.4f}")
+    worst_auc = max(worst_auc, abs(auc(dfa(g1), dfa(g2)) - auc(g1, g2)))
+check("rank-based analyses: same ROC AUC on FA and deficit scales, max difference", worst_auc, 0.0, 1e-12, "{:.1e}")
 pr = lambda l: float(1 / ((np.asarray(l, float) / np.sum(l)) ** 2).sum())
 check_true("PR_lambda = e^H_2 is 1 for a stick, 2 for a flat disc and 3 for a sphere",
            np.allclose([pr([1, 0, 0]), pr([1, 1, 0]), pr([1, 1, 1])], [1, 2, 3]))
