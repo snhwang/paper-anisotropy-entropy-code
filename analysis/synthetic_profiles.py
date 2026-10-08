@@ -153,7 +153,7 @@ ticks = [0.25, 0.5, 1, 2, 4, 8, 16]
 ax[0].set_xticks(ticks); ax[0].set_xticklabels(["1/4", "1/2", "1", "2", "4", "8", "16"]); ax[0].minorticks_off()
 ax[0].axvline(1, color="0.7", linewidth=0.8, linestyle=":"); ax[0].axvline(2, color="0.7", linewidth=0.8, linestyle=":")
 ax[0].set_title("A. Normalized Rényi spectrum", loc="left"); ax[0].legend(frameon=False)
-# B: one quantity in one unit, the divergence from isotropy, ln K - H_alpha, at three
+# B: the divergence from isotropy, ln K - H_alpha, in one unit, at three
 # orders of the profile and at order 2 of the tensor eigenvalues (K = 3). Every column is
 # given by the identity in closed form; heights are comparable, the rise with alpha is the
 # order dependence, and the tensor's zero on the three-way crossing sits beside a nonzero

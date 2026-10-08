@@ -2,7 +2,7 @@
 
 Analysis code for the paper *Diffusion anisotropy and entropy: reflections of each other* (Scott N. Hwang, Jonathan K. Maffie, Sangam G. Kanekar). Preprint: https://doi.org/10.5281/zenodo.21318332.
 
-The paper shows that diffusion anisotropy indices and entropies are one quantity at matched order. For any positive values, the Rényi entropy of their proportions at order α is a strictly monotone function of the power-mean Jensen gap of the same order. This repository holds the scripts that produce every number, table and figure in the paper. It also holds a script that checks every stated relation and every quoted number.
+The paper shows that, at matched order, diffusion anisotropy indices and entropies are related one to one. For any positive values, the Rényi entropy of their proportions at order α is a strictly monotone function of the power-mean Jensen gap of the same order. This repository holds the scripts that produce every number, table and figure in the paper. It also holds a script that checks every stated relation and every quoted number.
 
 ## Contents
 
