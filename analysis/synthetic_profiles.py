@@ -1,8 +1,7 @@
-"""Synthetic directional profiles: how anisotropy indices and entropies read the
-same voxel. The didactic core of the paper: cases in which "anisotropy" and
-"entropy" appear to disagree (a crossing is highly non-isotropic yet has higher
-entropy than a single fiber) are all divergences from the isotropic reference,
-read at different Renyi orders / Jensen generators.
+"""Table 1 (Section 4.3): anisotropy indices and entropies of noise-free synthetic voxels.
+At order 2 the normalized entropy is a function of CV_D alone, so the two columns carry the
+same information. An entropy of another order reads the same divergence from isotropy
+differently and can order the voxels differently.
 
 For each synthetic profile D_i = sum_k f_k g_i^T D_k g_i on N=93 near-uniform
 directions we compute, from the angular distribution p_i = D_i / sum_j D_j:
@@ -154,7 +153,7 @@ ticks = [0.25, 0.5, 1, 2, 4, 8, 16]
 ax[0].set_xticks(ticks); ax[0].set_xticklabels(["1/4", "1/2", "1", "2", "4", "8", "16"]); ax[0].minorticks_off()
 ax[0].axvline(1, color="0.7", linewidth=0.8, linestyle=":"); ax[0].axvline(2, color="0.7", linewidth=0.8, linestyle=":")
 ax[0].set_title("A. Normalized Rényi spectrum", loc="left"); ax[0].legend(frameon=False)
-# B: one quantity in one unit, the divergence from isotropy in nats, ln K - H_alpha, at three
+# B: one quantity in one unit, the divergence from isotropy, ln K - H_alpha, at three
 # orders of the profile and at order 2 of the tensor eigenvalues (K = 3). Every column is
 # given by the identity in closed form; heights are comparable, the rise with alpha is the
 # order dependence, and the tensor's zero on the three-way crossing sits beside a nonzero
@@ -171,7 +170,7 @@ idx = np.arange(len(df)); w = 0.2
 for k, col in enumerate(div.columns[1:]):
     ax[1].bar(idx + (k - 1.5) * w, div[col].values, w, label=col)
 ax[1].set_xticks(idx); ax[1].set_xticklabels(df["case"], rotation=30, ha="right")
-ax[1].set_ylabel(r"divergence from isotropy, $\ln K - H_\alpha$ (nats)")
+ax[1].set_ylabel(r"divergence from isotropy, $\ln K - H_\alpha$")
 ax[1].set_title("B. One divergence, read at three orders and on two distributions", loc="left"); ax[1].legend(frameon=False, ncol=1, fontsize=9)
 fig.tight_layout()
 (ROOT / "figures").mkdir(exist_ok=True)

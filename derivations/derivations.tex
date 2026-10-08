@@ -71,6 +71,7 @@ equality only when all values are equal. For a concave function the inequality r
 $\varphi(x)=x^{\alpha}$ is convex for $\alpha>1$ and for $\alpha<0$, and concave for $0<\alpha<1$. So
 $\langle x^\alpha\rangle - \bar x^{\,\alpha}$, and with it $J_\alpha$, is positive for $\alpha>1$ and $\alpha<0$ and
 negative for $0<\alpha<1$, unless all values are equal. In both cases $J_\alpha$ has the sign of $\alpha(\alpha-1)$.
+\numcheck{sign violations (gap sign, divergence sign by order)}
 
 Since $\langle x^\alpha\rangle = M_\alpha^{\,\alpha}$ and $\bar x = M_1$, the gap is also
 \begin{equation}
@@ -207,6 +208,7 @@ $\sin^2\theta = 1-\cos^2\theta = \CV_x^2/(1+\CV_x^2)$.
 \numcheck{PR/K = cos\^{}2 theta | CV = tan theta}
 
 \section{Near isotropy, Eq.~4}
+\label{sec:near}
 
 Write $x_i = \bar x(1+\varepsilon_i)$. Averaging gives $\langle\varepsilon\rangle = 0$, and
 $\langle\varepsilon^2\rangle = \sigma_x^2/\bar x^2 = \CV_x^2$. Expanding $(1+\varepsilon_i)^{\alpha}$ to second order,
@@ -219,9 +221,14 @@ Since $\ln(1+J) = J + O(J^2)$, Eq.~\eqref{eq:deficit} gives
 \begin{equation}
 \ln K - H_\alpha = \frac{J_\alpha}{\alpha-1} + O(\varepsilon^3) = \frac{\alpha}{2}\,\CV_x^2 + O(\varepsilon^3) .
 \end{equation}
-The coefficient of the cubic term grows with $\alpha$, so the approximation is not uniform in the order. At
+Carrying the expansion of $(1+\varepsilon_i)^{\alpha}$ one term further adds
+$\tfrac16\alpha(\alpha-1)(\alpha-2)\langle\varepsilon^3\rangle$ to $1+J_\alpha$. Since $J_\alpha^2$ is $O(\varepsilon^4)$,
+\begin{equation}
+\ln K - H_\alpha = \frac{\alpha}{2}\,\CV_x^2 + \frac{\alpha(\alpha-2)}{6}\,\langle\varepsilon^3\rangle + O(\varepsilon^4) .
+\end{equation}
+The cubic coefficient grows without bound with $\alpha$, so the approximation is not uniform in the order. At
 $\alpha=\infty$ the deficit $\ln(x_{\max}/\bar x) = \ln(1+\varepsilon_{\max})\approx\varepsilon_{\max}$ is first order.
-\numcheck{second-order form overstates the order-2 member at CV 0.544 (fraction)}
+\numcheck{Eq. 4: J\_alpha / (alpha(alpha-1)/2 CV\^{}2) | Eq. 4: (ln K - H\_alpha) / (alpha/2 CV\^{}2) | Supplement S7: cubic term | Eq. 4: at alpha = infinity the deficit is first order}
 
 \section{Divergences are not metrics}
 
@@ -258,6 +265,11 @@ H_2 = \ln(3-2\FA^2), \qquad \ln3 - H_2 = -\ln\bigl(1 - \tfrac23\FA^2\bigr) .
 \end{equation}
 Near isotropy the second form is $\tfrac23\FA^2$ to leading order.
 \numcheck{tensor orders, FA, QA and VR relations | ln 3 - H\_2(lambda) = -ln(1 - 2 FA\^{}2/3)}
+
+\textbf{The order-1 member near isotropy.} Near isotropy $\FA^2 = \tfrac32\CV_\lambda^2/(1+\CV_\lambda^2) \approx
+\tfrac32\CV_\lambda^2$, so $\CV_\lambda^2\approx\tfrac23\FA^2$. By Eq.~4 at $\alpha=1$ the order-1 member is then
+$\approx\tfrac12\CV_\lambda^2 = \FA^2/3$ to leading order.
+\numcheck{order-1 member / (FA\^{}2/3) near isotropy (FA < 0.05), median}
 
 \textbf{The trace form of \"Ozarslan et al.} The trace-normalized tensor $R = \mathbf D/\tr\mathbf D$ has eigenvalues
 $p^{(\lambda)}_i$, so $\tr R^2 = \sum_i(p^{(\lambda)}_i)^2 = e^{-H_2}$. Then
@@ -301,6 +313,20 @@ $-1$), and $\cos3\phi$ is one-to-one on that range. So FA fixes $|d|$, mode fixe
 $p^{(\lambda)}$ and every entropy of it.
 \numcheck{Supplement: mode = cos 3 phi and sum p\^{}2 = 1/3 + |d|\^{}2}
 
+\textbf{The order-1 band at fixed FA.} Scale the eigenvalues so that $\lambda_1=1$, and let $0\le t\le1$. Linear
+tensors are $(1,t,t)$, planar tensors $(1,1,t)$, and tensors with a zero eigenvalue $(1,t,0)$. By the definition of
+FA in Eq.~5, the three families have
+\begin{equation}
+\FA^2 = \frac{(1-t)^2}{1+2t^2}, \qquad \FA^2 = \frac{(1-t)^2}{2+t^2}, \qquad \FA^2 = \frac{t^2-t+1}{1+t^2} .
+\end{equation}
+The planar family reaches its largest FA, $1/\sqrt2$, at $t=0$, the flat disc $(1,1,0)$. The zero-eigenvalue family
+runs from the same disc at $t=1$ to the stick $(1,0,0)$, with $\FA=1$, at $t=0$. A fixed FA fixes
+$\sum_i(p^{(\lambda)}_i)^2$, the index of coincidence. Harremo\"es and Tops{\o}e derived the joint range of the
+Shannon entropy and the index of coincidence (cited in the paper). For three outcomes, its upper boundary is the
+linear family. Its lower boundary is the planar family up to $\FA=1/\sqrt2$ and the zero-eigenvalue family above
+it. We do not repeat their proof.
+\numcheck{Supplement S9: FA of the linear, planar and zero-eigenvalue families | random eigenvalue triples inside the linear/planar/zero-eigenvalue interval | interval width at FA 0.2 | interval width at FA 0.5}
+
 \section{The directional profile}
 
 \textbf{GFA, Eq.~7.} For $N$ values $D_i$, Tuch's generalized fractional anisotropy is the standard deviation, with
@@ -311,6 +337,7 @@ divisor $N-1$, over the root mean square:
 \end{equation}
 By Eq.~\eqref{eq:order2} and the geometric form this equals $\frac{N}{N-1}(1-\PR/N) = \frac{N}{N-1}\sin^2\theta$.
 With $N=3$ the prefactor is $\tfrac32$ and this is Eq.~5.
+\numcheck{Eq. 7: GFA\^{}2 (Tuch) = N/(N-1) CV\^{}2/(1+CV\^{}2) = N/(N-1)(1 - PR/N) = N/(N-1) sin\^{}2 theta}
 
 \textbf{The CVD of Aja-Fern\'andez et al.} With $\log E_i = -bD_i$, their sample variance and second moment are
 \begin{equation}
@@ -324,7 +351,7 @@ So $\mathrm{CVD}^2 = \mathcal V/\langle(\log E)^2\rangle = \frac{N}{N-1}\,\sigma
 well. Near isotropy write $D_i = \bar D + \delta_i$ with $\langle\delta\rangle = 0$ and $\langle\delta^2\rangle =
 \sigma_D^2$. Then $e^{-bD_i} = e^{-b\bar D}e^{-b\delta_i} \approx e^{-b\bar D}(1-b\delta_i)$. The signals have mean
 $\approx e^{-b\bar D}$ and standard deviation $\approx e^{-b\bar D}b\sigma_D$, so their coefficient of variation is
-$\approx b\sigma_D$. By Section~S7 the entropy deficits of the two domains are $\approx\frac{\alpha}{2}\CV_D^2$ and
+$\approx b\sigma_D$. By Section~\ref{sec:near} the entropy deficits of the two domains are $\approx\frac{\alpha}{2}\CV_D^2$ and
 $\approx\frac{\alpha}{2}(b\sigma_D)^2$, and their ratio is
 \begin{equation}
 \frac{(b\sigma_D)^2}{(\sigma_D/\bar D)^2} = (b\bar D)^2 .
@@ -361,7 +388,7 @@ Equal-weight averages over $N$ near-uniform directions approximate these sphere 
 \textbf{The linear limit.} For $\lambda\propto(1,0,0)$, $\CV_\lambda^2 = 2$ and $\CV_D^2 = \tfrac45$. The normalized
 second moments are $1+\CV_\lambda^2 = 3$ and $1+\CV_D^2 = \tfrac95$, whose ratio is $\tfrac35$, the value
 \"Ozarslan et al.\ report for the profile against the eigenvalues.
-\numcheck{CV\_D\^{}2 / CV\_lambda\^{}2 on a dense sphere, 50 random tensors | linear tensor: profile's normalized second moment / eigenvalues' = 3/5}
+\numcheck{Sec 4.2 sphere moments | CV\_D\^{}2 / CV\_lambda\^{}2 on a dense sphere, 50 random tensors | linear tensor: profile's normalized second moment / eigenvalues' = 3/5}
 
 \section{The order-1 link between profile and tensor}
 

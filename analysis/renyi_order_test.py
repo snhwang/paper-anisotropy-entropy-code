@@ -1,5 +1,5 @@
 """Does going to higher Renyi order add anything, or just add noise?
-For a few subjects, compute the normalized Renyi entropy H~_alpha at
+For the four subjects of the paper, compute the normalized Renyi entropy H~_alpha at
 alpha = 1,2,3,5,10 in both domains (diffusivity p~D, signal p~e^{-bD}),
 voxelwise in brain, and report:
   (1) REDUNDANCY: correlation of H~_alpha with H~_2 (is higher order new info?)

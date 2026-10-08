@@ -1,10 +1,10 @@
-"""Concept figure: three diffusion tensors read as distributions of their normalized eigenvalues.
+"""Figure 1: three diffusion tensors read as distributions of their normalized eigenvalues.
 
 An isotropic tensor, a prolate (linear) tensor and an oblate (planar) tensor. The prolate and oblate
 tensors are chosen with the same FA (0.6), so they share the order-2 entropy H_2 = ln(3 - 2 FA^2) and
 the participation ratio PR_lambda = exp(H_2), but their Shannon entropies H_1 differ because their
 shapes (tensor modes) differ. Top row, diffusion ellipsoids with semi-axes proportional to the
-eigenvalues, shaded as in the model-light basis figure. Bottom row, the normalized eigenvalues
+eigenvalues, with simple Lambertian shading. Bottom row, the normalized eigenvalues
 p_i = lambda_i / sum_j lambda_j against the uniform value 1/3. Entropies in natural-log units.
 
 Writes tensor_concept.{png,pdf} to the figures folder of paths.py and analysis/tensor_concept.csv,

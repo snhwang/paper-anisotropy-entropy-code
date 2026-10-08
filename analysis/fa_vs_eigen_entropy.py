@@ -1,4 +1,4 @@
-"""FA against the entropy of the normalized tensor eigenvalues, at order 2 and at order 1.
+"""Figure 2: FA against the entropy of the normalized tensor eigenvalues, at order 2 and at order 1.
 
 FA^2 = (3/2)(1 - PR_lambda/3) with PR_lambda = exp(H_2(p_lambda)), so at order 2 FA is an exact
 monotone function of the eigenvalue entropy:  H~_2 = ln(3 - 2 FA^2) / ln 3.  At order 1 (Shannon)
@@ -7,7 +7,7 @@ feasible region on the 2-simplex is bounded exactly by
   upper:  linear (prolate) tensors, lambda = (1, t, t)          mode = +1
   lower:  planar (oblate) tensors,  lambda = (1, 1, t)          mode = -1,  FA <= 1/sqrt(2)
           one eigenvalue zero,      lambda = (1, t, 0)                      FA >= 1/sqrt(2)
-(checked numerically on 3 million simplex points before writing this script). The tensor mode
+(checked in identity_checks.py on 800,000 random eigenvalue triples). The tensor mode
 (Ennis & Kindlmann 2006) therefore sets the position inside the band.
 
 Data: tissue voxels of the four HCP-Aging subjects of the paper (first four rows of the b=1500

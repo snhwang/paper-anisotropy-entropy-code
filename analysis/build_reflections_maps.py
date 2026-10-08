@@ -1,17 +1,17 @@
-"""Reflections figure: each anisotropy index next to the entropy it mirrors, on one
-representative de-identified HCP-A subject (b = 1500, single axial slice).
+"""Figure 3: each anisotropy index next to the entropy it mirrors, on one de-identified
+HCP-A participant (b = 1500, single axial slice).
 
-Row 1, the directional diffusivities (N = 93 directions):
-  J_quad = CV_D^2          (quadratic Jensen gap = chi^2 divergence from isotropy)
-  PR/N   = 1/(1 + CV_D^2)  (its exact order-2 mirror, the normalized participation ratio)
-  H~_1                     (normalized Shannon entropy of the directional distribution,
-                            the order-1 reading of the same divergence)
-Row 2, the tensor eigenvalues (K = 3):
-  FA                       (the same construction on the normalized eigenvalues)
+Top row, the tensor eigenvalues (K = 3):
+  FA                       (the order-2 index of the normalized eigenvalues)
   PR_lambda/3              (its exact order-2 mirror: FA^2 = (3/2)(1 - PR_lambda/3))
   H~_1(lambda)             (normalized Shannon entropy of the eigenvalue distribution;
                             exp(H_1) in [1, 3] is the effective number of principal
                             directions)
+Bottom row, the directional diffusivities (N = 93 directions):
+  J_quad = CV_D^2          (quadratic Jensen gap = chi^2 divergence from isotropy)
+  PR/N   = 1/(1 + CV_D^2)  (its exact order-2 mirror, the normalized participation ratio)
+  H~_1                     (normalized Shannon entropy of the directional distribution,
+                            the order-1 reading of the same divergence)
 Every identity is asserted voxelwise before plotting. Per-direction diffusivities are
 D_i = -ln(S_i / S_0) / b on the b = 1500 volumes, S_0 the mean of the b = 0 volumes,
 restricted to the brain mask and to voxels with all S_i > 0. Eigenvalues are clipped at
@@ -33,7 +33,7 @@ from paths import DTI_OUTPUT, MANIFEST, FIGURES
 
 ROOT = Path(__file__).resolve().parent.parent
 HERE = ROOT / "analysis"
-# the second participant of Figure 1, chosen by position in the manifest (identifiers are not published)
+# the second of the four participants of Figure 2, chosen by position in the manifest (identifiers are not published)
 SESSION = DTI_OUTPUT / pd.read_csv(MANIFEST, sep="\t").session_id.iloc[1]
 B, TOL, SLICE_Z = 1500.0, 150.0, 60
 

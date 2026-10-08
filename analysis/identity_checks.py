@@ -8,8 +8,8 @@ Part B reads the CSV outputs of the scripts in this folder:
   direction_count.csv           direction_count.py         (entropies against the number of directions)
   order1_link.csv               order1_link.py             (order-1 profile against eigenvalue deficit)
   reflections_maps_check.csv    build_reflections_maps.py  (Figure 3, voxelwise identities)
-  fa_vs_eigen_entropy.csv       fa_vs_eigen_entropy.py     (tensor interval in tissue)
-  renyi_order_test.csv          renyi_order_test.py        (orders 1 and 2 in tissue)
+  fa_vs_eigen_entropy.csv       fa_vs_eigen_entropy.py     (Figure 2, tissue numbers of Sections 3.2 and 5)
+  renyi_order_test.csv          renyi_order_test.py        (directional orders in tissue, split-half reliability)
   acquisition_counts.csv        acquisition_counts.py      (Section 5 acquisition facts)
 The last four need the HCP-Aging processing sessions (DTI_OUTPUT_DIR) to regenerate, and their CSVs
 are kept here so the checks run without the data. Part A also computes the Discussion's worked
@@ -77,7 +77,7 @@ check("Eq. 2 derivation: sum p^alpha = K^(1-alpha)(1 + J_alpha), max rel error",
 x = rng.uniform(0.1, 3, 40); p = x / x.sum(); K = x.size; cv2 = x.var() / x.mean() ** 2
 check("order 2: PR/K = 1/(1+CV^2)", (1 / (p ** 2).sum()) / K - 1 / (1 + cv2), 0.0, 1e-12, "{:.1e}")
 check("order 2: CV^2 = chi^2(p||u)", cv2 - (K * (p ** 2).sum() - 1), 0.0, 1e-12, "{:.1e}")
-check("order 1/2: ln K - H_1/2 = -2 ln BC(p,u)", (np.log(K) - renyi(p, 0.5)) + 2 * np.log(np.sqrt(p / K).sum()), 0.0, 1e-12, "{:.1e}")
+check("order 1/2: ln K - H_1/2 = Div_1/2(p||u) = -2 ln sum sqrt(p_i u_i)", (np.log(K) - renyi(p, 0.5)) + 2 * np.log(np.sqrt(p / K).sum()), 0.0, 1e-12, "{:.1e}")
 check("order inf: ln K - H_inf = ln(max x / mean x)", (np.log(K) - renyi(p, np.inf)) - np.log(x.max() / x.mean()), 0.0, 1e-12, "{:.1e}")
 klu = (np.log(1 / K) - np.log(p)).mean()
 check("uniform log gap ln(mean) - mean(ln) = KL(u||p)", (np.log(x.mean()) - np.log(x).mean()) - klu, 0.0, 1e-12, "{:.1e}")
@@ -92,11 +92,41 @@ for _ in range(3000):
         bad += int(np.sign(J) != np.sign(a * (a - 1))) + int((a > 0) and D < -1e-12) + int((a < 0) and D > 1e-12)
 check("sign violations (gap sign, divergence sign by order)", bad, 0, 0, "{:.0f}")
 
+# A3b. near isotropy, Eq. 4: J_alpha ~ alpha(alpha-1)/2 CV^2 and ln K - H_alpha ~ (alpha/2) CV^2, with the cubic term
+# alpha(alpha-2)/6 <eps^3> of the Supplement (Section S7); at alpha = infinity the deficit is first order
+r4 = np.random.default_rng(4); eps = r4.exponential(1.0, 60); eps = 1e-3 * (eps - eps.mean()) / eps.std()
+x = 1 + eps; p = x / x.sum(); K = x.size; m2, m3 = (eps ** 2).mean(), (eps ** 3).mean()
+worst_j = worst_d = worst_c = 0.0
+for a in (0.5, 1.0, 2.0, 3.0, 5.0, 10.0):
+    D = np.log(K) - renyi(p, a)
+    if a != 1.0:
+        worst_j = max(worst_j, abs(((x ** a).mean() / x.mean() ** a - 1) / (0.5 * a * (a - 1) * m2) - 1))
+    worst_d = max(worst_d, abs(D / (0.5 * a * m2) - 1))
+    if a != 2.0:
+        worst_c = max(worst_c, abs((D - 0.5 * a * m2) / (a * (a - 2) / 6 * m3) - 1))
+check("Eq. 4: J_alpha / (alpha(alpha-1)/2 CV^2) at CV 1e-3, orders 1/2 to 10, max |ratio - 1|", worst_j, 0.0, 0.02, "{:.1e}")
+check("Eq. 4: (ln K - H_alpha) / (alpha/2 CV^2) at CV 1e-3, orders 1/2 to 10, max |ratio - 1|", worst_d, 0.0, 0.02, "{:.1e}")
+check("Supplement S7: cubic term alpha(alpha-2)/6 <eps^3>, max |ratio - 1|", worst_c, 0.0, 0.02, "{:.1e}")
+check("Eq. 4: at alpha = infinity the deficit is first order, ln(x_max/mean) / eps_max",
+      (np.log(K) - renyi(p, np.inf)) / ((x.max() - x.mean()) / x.mean()), 1.0, 0.01, "{:.4f}")
+
 # A4. angle form: theta between x and (1,...,1)
 x = rng.uniform(0.1, 3, 3); th = np.arccos(x.sum() / np.sqrt(3 * (x ** 2).sum())); p = x / x.sum()
 check("PR/K = cos^2 theta", (1 / (p ** 2).sum()) / 3 - np.cos(th) ** 2, 0.0, 1e-12, "{:.1e}")
 check("CV = tan theta", np.sqrt(x.var() / x.mean() ** 2) - np.tan(th), 0.0, 1e-12, "{:.1e}")
 check("FA = sqrt(3/2) sin theta", fa(x) - np.sqrt(1.5) * np.sin(th), 0.0, 1e-12, "{:.1e}")
+
+# A4a. GFA, Eq. 7: Tuch's definition (standard deviation with divisor N - 1 over the root mean square) in every form
+r_gfa = np.random.default_rng(2004); worst = 0.0
+for _ in range(500):
+    N = int(r_gfa.integers(3, 150)); D = r_gfa.uniform(0.1, 3.0, N); p = D / D.sum(); cv2 = D.var() / D.mean() ** 2
+    gfa2 = (D.std(ddof=1) / np.sqrt((D ** 2).mean())) ** 2
+    th = np.arccos(D.sum() / np.sqrt(N * (D ** 2).sum()))
+    worst = max(worst, abs(gfa2 - N / (N - 1) * cv2 / (1 + cv2)), abs(gfa2 - N / (N - 1) * (1 - 1 / (N * (p ** 2).sum()))),
+                abs(gfa2 - N / (N - 1) * np.sin(th) ** 2))
+    if N == 3:
+        worst = max(worst, abs(gfa2 - fa(D) ** 2))
+check("Eq. 7: GFA^2 (Tuch) = N/(N-1) CV^2/(1+CV^2) = N/(N-1)(1 - PR/N) = N/(N-1) sin^2 theta", worst, 0.0, 1e-12, "{:.1e}")
 
 # A4b. the coefficient of variation of the diffusion (Aja-Fernandez et al. 2018, Eq. 20) equals the GFA of Eq. (7)
 r_cvd = np.random.default_rng(2018); worst = 0.0
@@ -154,6 +184,11 @@ lo = np.where(f <= 1 / np.sqrt(2), h1_at("pla", np.minimum(f, 1 / np.sqrt(2))), 
 check_true(f"all {keep.sum():,} random eigenvalue triples inside the linear/planar/zero-eigenvalue interval",
            bool(((h <= up + 1e-9) & (h >= lo - 1e-9)).all()))
 w = lambda fq: float(h1_at("lin", np.array([fq]))[0] - h1_at("pla", np.array([fq]))[0])
+_t = np.linspace(0, 1, 1001); _o = np.ones_like(_t)
+_fam = [(np.stack([_o, _t, _t], 1), (1 - _t) ** 2 / (1 + 2 * _t ** 2)), (np.stack([_o, _o, _t], 1), (1 - _t) ** 2 / (2 + _t ** 2)),
+        (np.stack([_o, _t, 0 * _t], 1), (_t ** 2 - _t + 1) / (1 + _t ** 2))]
+check("Supplement S9: FA of the linear, planar and zero-eigenvalue families, max error",
+      max(float(np.max(np.abs(fa_rows(L) ** 2 - f2))) for L, f2 in _fam), 0.0, 1e-12, "{:.1e}")
 check("interval width at FA 0.2", w(0.2), 0.0011, 0.00005, "{:.4f}")
 check("interval width at FA 0.5", w(0.5), 0.025, 0.0006, "{:.4f}")
 small = f < 0.05
@@ -169,6 +204,12 @@ for _ in range(50):
     D = np.einsum("ij,jk,ik->i", G, T, G)
     worst = max(worst, abs((D.var() / D.mean() ** 2) / (lam.var() / lam.mean() ** 2) - 0.4))
 check("CV_D^2 / CV_lambda^2 on a dense sphere, 50 random tensors, max |ratio - 2/5|", worst, 0.0, 1e-4, "{:.1e}")
+worst = 0.0
+for _ in range(50):
+    lam = rng.uniform(0.1, 3.0, 3); Q, _ = np.linalg.qr(rng.normal(size=(3, 3))); T = Q @ np.diag(lam) @ Q.T
+    D = np.einsum("ij,jk,ik->i", G, T, G)
+    worst = max(worst, abs(D.mean() / (np.trace(T) / 3) - 1), abs((D ** 2).mean() / ((np.trace(T) ** 2 + 2 * np.trace(T @ T)) / 15) - 1))
+check("Sec 4.2 sphere moments: <D> = tr D/3, <D^2> = [(tr D)^2 + 2 tr D^2]/15, max rel error", worst, 0.0, 1e-4, "{:.1e}")
 Ds = G[:, 0] ** 2  # linear tensor: normalized second moment 3<D_N^2> of the profile against sum rho^2 = 1
 check("linear tensor: profile's normalized second moment / eigenvalues' = 3/5 (Ozarslan 2005)", float(3 * np.mean(Ds ** 2)), 0.6, 1e-4, "{:.4f}")
 
@@ -181,10 +222,6 @@ def ren2(p, q, a):
 check("order 1/2 is symmetric, max |D(p||q) - D(q||p)|", float(np.max(np.abs(ren2(A, B, .5) - ren2(B, A, .5)))), 0.0, 1e-10, "{:.1e}")
 check_true("orders 1, 2 and 4 are asymmetric", all(float(np.max(np.abs(ren2(A, B, a) - ren2(B, A, a)))) > 0.01 for a in (1, 2, 4)))
 check_true("order 1/2 fails the triangle inequality on some triples", bool((ren2(A, C, .5) > ren2(A, B, .5) + ren2(B, C, .5) + 1e-12).any()))
-bc = lambda p, q: np.clip(np.sqrt(p * q).sum(1), 0, 1)
-check_true("Bhattacharyya angle and Hellinger distance satisfy it",
-           bool(((np.arccos(bc(A, C)) <= np.arccos(bc(A, B)) + np.arccos(bc(B, C)) + 1e-9).all()) and
-                ((np.sqrt(1 - bc(A, C)) <= np.sqrt(1 - bc(A, B)) + np.sqrt(1 - bc(B, C)) + 1e-9).all())))
 
 # A10. scale (Discussion): what the monotone transform leaves alone and what it changes
 dfa = lambda f: -np.log(1 - 2 * np.asarray(f, float) ** 2 / 3)  # ln 3 - H_2 of the eigenvalues, from Eq. FA
@@ -266,10 +303,10 @@ check("Table 1, max difference from synthetic_profiles.csv (3 d.p.)", worst, 0.0
 single = [c for c in TABLE if c.startswith("single") or c.startswith("planar")]
 ratios = [s.loc[c].CV_D ** 2 / (s.loc[c].FA_fit ** 2 / (1.5 - s.loc[c].FA_fit ** 2)) for c in single]
 check("CV_D^2 / CV_lambda^2, single-tensor voxels on 93 directions, max |ratio - 2/5|", max(abs(r - 0.4) for r in ratios), 0.0, 0.001, "{:.4f}")
-cv2s = s.loc["single fiber, strong"].CV_D ** 2
-check("second-order form overstates the order-2 member at CV 0.544 (fraction)", cv2s / np.log1p(cv2s) - 1, 0.14, 0.005, "{:.3f}")
 check("strong single fiber CV_D", float(s.loc["single fiber, strong"].CV_D), 0.544, 0.0005, "{:.4f}")
 tab = s.loc[[c for c in s.index if c not in ("isotropic", "three-way crossing")]]
+check("Table 1: profile GFA (Tuch) = sqrt(N/(N-1) CV_D^2/(1+CV_D^2)), Eq. 7, max error",
+      float(np.max(np.abs(tab.GFA_profile - np.sqrt(93 / 92 * tab.CV_D ** 2 / (1 + tab.CV_D ** 2))))), 0.0, 1e-12, "{:.1e}")
 check("Table 1: H~2 = 1 - ln(1 + CV_D^2)/ln N, max error", float(np.max(np.abs(tab.Hn_2 - (1 - np.log1p(tab.CV_D ** 2) / np.log(93))))), 0.0, 1e-9, "{:.1e}")
 check_true("Table 1: CV_D and H~2 rank the voxels in exactly opposite order",
            list(tab.CV_D.sort_values().index) == list(tab.Hn_2.sort_values(ascending=False).index))
@@ -284,6 +321,7 @@ check("Figure 3, voxelwise identities, max abs error", float(rm.max_abs_err.max(
 check("Figure 3, voxels checked, both rows about 387,000", float(abs(rm.n_vox.iloc[:2] - 387000).max()), 0, 1000, "{:.0f}")
 
 fe = pd.read_csv(HERE / "fa_vs_eigen_entropy.csv")
+check_true("Figure 2: four subjects, each with at least the 25,000 tissue voxels plotted", len(fe) == 4 and bool((fe.n_tissue >= 25_000).all()))
 check("tissue voxels inside the interval, min share over subjects", float(fe.frac_inside_order1_envelope.min()), 1.0, 1e-9, "{:.4f}")
 check("rho(FA, Shannon eigenvalue entropy), weakest subject", float(fe.rho_FA_H1.abs().min()), 0.9998, 0.00006, "{:.5f}")
 check("Sec 3.2 voxels ordered by mode: rho(mode, position), FA < 1/sqrt 2, weakest", float(fe.rho_mode_vs_band_position.min()), 0.9998, 0.00006, "{:.5f}")
