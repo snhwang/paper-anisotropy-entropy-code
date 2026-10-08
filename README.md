@@ -87,4 +87,4 @@ Figures are written to the `figures/` folder of the manuscript when `PAPER_DIR` 
 
 ## License
 
-Licensed under the Open Core Ventures Source Available License (OCVSAL) v1.0. See [LICENSE](LICENSE). Reading, running and modifying the code for non-production use, including reproducing the results of the paper, is permitted. Production use requires a commercial agreement. For commercial licensing, contact the Penn State Office of Technology Transfer at ottinfo@psu.edu.
+Released under the MIT License. See [LICENSE](LICENSE).
