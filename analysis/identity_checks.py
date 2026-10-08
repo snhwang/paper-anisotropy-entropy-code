@@ -236,11 +236,13 @@ check("region at FA 0.45 throughout: order-2 deficit", float(dfa(0.45)), 0.145, 
 from scipy.stats import rankdata
 def auc(a, b):
     r = rankdata(np.concatenate([a, b])); return (r[a.size:].sum() - b.size * (b.size + 1) / 2) / (a.size * b.size)
-worst_auc = 0.0
-for m in (0.20, 0.45):  # two groups 0.02 apart in FA, between-subject SD 0.03
-    g1, g2 = np.abs(rng.normal(m, 0.03, 100_000)), np.abs(rng.normal(m + 0.02, 0.03, 100_000))
-    worst_auc = max(worst_auc, abs(auc(dfa(g1), dfa(g2)) - auc(g1, g2)))
+cohen = lambda a, b: (b.mean() - a.mean()) / np.sqrt((a.var() + b.var()) / 2)
+worst_d, worst_auc = 0.0, 0.0
+for m in (0.10, 0.20, 0.45):  # two groups 0.02 apart in FA, between-subject SD 0.03, gray matter to white matter
+    g1, g2 = np.abs(rng.normal(m, 0.03, 200_000)), np.abs(rng.normal(m + 0.02, 0.03, 200_000))
+    worst_d = max(worst_d, abs(cohen(dfa(g1), dfa(g2)) / cohen(g1, g2) - 1)); worst_auc = max(worst_auc, abs(auc(dfa(g1), dfa(g2)) - auc(g1, g2)))
 check("rank-based analyses: same ROC AUC on FA and deficit scales, max difference", worst_auc, 0.0, 1e-12, "{:.1e}")
+check("noise compressed with the effect: group difference / SD, deficit vs FA scale, FA 0.1-0.45, max |ratio - 1|", worst_d, 0.0, 0.03, "{:.3f}")
 pr = lambda l: float(1 / ((np.asarray(l, float) / np.sum(l)) ** 2).sum())
 check_true("PR_lambda = e^H_2 is 1 for a stick, 2 for a flat disc and 3 for a sphere",
            np.allclose([pr([1, 0, 0]), pr([1, 1, 0]), pr([1, 1, 1])], [1, 2, 3]))
